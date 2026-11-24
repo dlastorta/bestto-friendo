@@ -1,0 +1,60 @@
+name: Vertical slices checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: tournament
+          POSTGRES_PASSWORD: tournament_local
+          POSTGRES_DB: tournament_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tournament -d tournament_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ConnectionStrings__TournamentDb: Host=localhost;Port=5432;Database=tournament_test;Username=tournament;Password=tournament_local
+      RUN_POSTGRES_INTEGRATION: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check architecture boundaries
+        run: python3 scripts/verify_structure.py
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore TournamentManager.slnx
+      - name: Build
+        run: dotnet build TournamentManager.slnx --no-restore
+      - name: Restore dotnet-ef
+        run: dotnet tool restore
+      - name: Apply migrations
+        run: dotnet tool run dotnet-ef database update --project backend/TournamentManager.Infrastructure --startup-project backend/TournamentManager.Api
+      - name: Tests
+        run: dotnet test TournamentManager.slnx --no-restore
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install --no-audit --no-fund
+      - name: Tests
+        working-directory: frontend
+        run: npm test
+      - name: Build
+        working-directory: frontend
+        run: npm run build

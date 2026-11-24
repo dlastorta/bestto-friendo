@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="backend/TournamentManager.Domain/TournamentManager.Domain.csproj" />
+  <Project Path="backend/TournamentManager.Application/TournamentManager.Application.csproj" />
+  <Project Path="backend/TournamentManager.Infrastructure/TournamentManager.Infrastructure.csproj" />
+  <Project Path="backend/TournamentManager.Api/TournamentManager.Api.csproj" />
+  <Project Path="backend/TournamentManager.Tests/TournamentManager.Tests.csproj" />
+</Solution>

@@ -52,6 +52,16 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 - Cálculo automático de estrategia/arquetipo a partir de cartas.
 - Integración automática con páginas de terceros para publicación.
 
+## Backlog futuro — Finanzas y tercer tiempo (fuera del MVP)
+
+Estas capacidades no tienen slice asignado ni modifican el orden, alcance o criterios de los slices 00–15. No implementar hasta planificar y aprobar su alcance.
+
+- **Gestión económica de torneos:** presupuesto por categoría, estimación de inscripciones pagas, precio sugerido con reserva configurable y ajuste manual, pagos y exenciones, gastos reales con pagador y comprobantes opcionales, ingresos/egresos/resultado, moneda y redondeo por evento.
+- **Tercer tiempo:** evento opcional asociado al torneo, invitados incluso no competidores, respuestas Sí/No/NS/NC, confirmación de asistencia, compras y reparto equitativo, saldos, transferencias sugeridas y liquidaciones. Inscripción y asistencia independientes del torneo.
+- **Tercer tiempo — Reparto avanzado:** extensión del reparto básico para definir participantes específicos por gasto, excluir personas del reparto general o particular y calcular saldos individuales respetando las compras realizadas, incluso por quienes no asisten o no participan del reparto.
+
+Los módulos financieros son independientes de clasificación, emparejamiento y puntuación. Deben preservar auditoría, privacidad, exactitud monetaria y evitar doble contabilización. Ver [reglas y propuestas financieras](TOURNAMENT_RULES.md).
+
 ## Definition of Done por slice
 
 1. Caso de uso y criterios de aceptación documentados.

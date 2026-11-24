@@ -3,6 +3,7 @@ using TournamentManager.Application.Features.Games.CreateGame;
 using TournamentManager.Application.Features.Games.GetGame;
 using TournamentManager.Application.Features.Games.ListGames;
 using TournamentManager.Domain.Games;
+using TournamentManager.Api.Features.Identity;
 
 namespace TournamentManager.Api.Features.Games;
 
@@ -40,7 +41,7 @@ public static class GameEndpoints
             {
                 return Results.Conflict(new { message = ex.Message });
             }
-        }).WithName("CreateGame");
+        }).WithName("CreateGame").RequireAuthorization("ManageCatalog").AddEndpointFilter<CsrfFilter>();
 
         return endpoints;
     }

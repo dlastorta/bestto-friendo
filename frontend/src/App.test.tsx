@@ -9,8 +9,8 @@ afterEach(() => {
 describe('Slice 00 · pantalla de estado', () => {
   it('muestra API y PostgreSQL al consultar ambos health checks', async () => {
     const fetchMock = vi.fn(async (input: string) => ({
-      ok: true,
-      status: 200,
+      ok: input !== '/api/me',
+      status: input === '/api/me' ? 401 : 200,
       json: async () => input === '/api/games' ? [] : ({ status: input.includes('/ready') ? 'ready' : 'healthy' }),
     }))
     vi.stubGlobal('fetch', fetchMock)
@@ -29,8 +29,8 @@ describe('Slice 00 · pantalla de estado', () => {
 
   it('distingue readiness caída de liveness operativa', async () => {
     vi.stubGlobal('fetch', vi.fn(async (input: string) => ({
-      ok: !input.includes('/ready'),
-      status: input.includes('/ready') ? 503 : 200,
+      ok: input !== '/api/me' && !input.includes('/ready'),
+      status: input === '/api/me' ? 401 : input.includes('/ready') ? 503 : 200,
       json: async () => input === '/api/games' ? [] : ({ status: 'healthy' }),
     })))
 

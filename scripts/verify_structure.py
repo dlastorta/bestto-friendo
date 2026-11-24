@@ -41,6 +41,12 @@ REQUIRED = [
     'frontend/src/features/games/GamesCatalog.test.tsx',
     'frontend/src/features/games/api.ts',
     'docs/slices/01-CATALOGO.md',
+    'docs/slices/02-IDENTIDAD.md',
+    'backend/TournamentManager.Domain/Players/Player.cs',
+    'backend/TournamentManager.Application/Features/Identity/IdentityContracts.cs',
+    'backend/TournamentManager.Infrastructure/Identity/AccountAccess.cs',
+    'backend/TournamentManager.Api/Features/Identity/IdentityEndpoints.cs',
+    'frontend/src/features/identity/AccountPanel.tsx',
     '.github/workflows/ci.yml',
 ]
 
@@ -68,7 +74,7 @@ for project, expected in EXPECTED_PROJECT_REFS.items():
     assert refs == expected, f'{project}: referencias {refs}; esperadas {expected}'
     packages = {el.attrib['Include'] for el in xml_root.iter('PackageReference')}
     if project in ('TournamentManager.Domain', 'TournamentManager.Application'):
-        assert not any(name.startswith(('Microsoft.EntityFrameworkCore', 'Npgsql')) for name in packages), (
+        assert not any(name.startswith(('Microsoft.EntityFrameworkCore', 'Npgsql', 'Microsoft.AspNetCore.Identity')) for name in packages), (
             f'{project}: dependencias EF/Npgsql prohibidas: {packages}'
         )
     if project == 'TournamentManager.Api':
@@ -82,7 +88,7 @@ for project in ('TournamentManager.Domain', 'TournamentManager.Application'):
     for source in (BACKEND / project).rglob('*.cs'):
         source_lines = source.read_text(encoding='utf-8').splitlines()
         code = '\n'.join(line.split('//', 1)[0] for line in source_lines)
-        forbidden = r'\b(Microsoft\.EntityFrameworkCore|Npgsql|DbContext|DbSet|IQueryable|EntityEntry|SaveChangesAsync)\b'
+        forbidden = r'\b(Microsoft\.EntityFrameworkCore|Microsoft\.AspNetCore\.Identity|Npgsql|DbContext|DbSet|IQueryable|EntityEntry|SaveChangesAsync)\b'
         assert not re.search(forbidden, code), f'Persistencia fugada a {source}'
 for source in (BACKEND / 'TournamentManager.Api' / 'Features').rglob('*.cs'):
     code = '\n'.join(line.split('//', 1)[0] for line in source.read_text(encoding='utf-8').splitlines())

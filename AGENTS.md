@@ -9,13 +9,13 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 01 — Catálogo de juegos
+## Slice actual: 02 — Identidad mínima de jugador
 
-**Permitido:** crear/listar/consultar juegos y sus facciones, configurar cardinalidad de selección (mínimo/máximo), validar pertenencia/duplicados, persistencia EF confinada a Infrastructure, migraciones, UI React y tests de comportamiento. Ver `docs/slices/01-CATALOGO.md`.
+**Permitido:** mantener el catálogo del Slice 01 e incorporar registro por email/contraseña, sesión por cookie, perfil propio y autorización del catálogo. Solo `CatalogAdmin` puede crear juegos; el registro no concede ese rol. Persistencia e Identity/EF confinados a Infrastructure, HTTP en API, reglas puras en Domain y casos de uso/puertos en Application. Ver `docs/slices/02-IDENTIDAD.md`.
 
-**No permitido en Slice 01:** identidad, autenticación, biblioteca de mazos, torneos, formatos avanzados, resultados, algoritmos suizos, Elo ni edición/eliminación de juegos. Solo `Game`, `GameFaction` y sus casos de uso inmediatos.
+**No permitido en Slice 02:** biblioteca de mazos, torneos, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos ni conciliación de invitados. Login con Google es mejora futura; no implementarlo en este slice.
 
-**Seguridad temporal:** las escrituras del catálogo no requieren login en este slice; **no publicar la API en Internet** hasta que se implemente autorización. El Slice 02 incorporará identidad mínima.
+**Seguridad temporal:** las escrituras requieren sesión, rol de administrador de catálogo y CSRF; el perfil se determina por la cuenta autenticada. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
 ## Enfoque arquitectónico
 
@@ -75,11 +75,12 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 01
+## Definition of Done — Slice 02
 
-- Crear y consultar juegos con facciones y cardinalidad desde API y React.
-- Validar en Domain nombres, rangos, duplicados y pertenencia de facciones a un juego.
-- Persistir con migración SQL versionada, sin EF en Domain, Application ni endpoints.
-- Tests unitarios, HTTP aislados y prueba PostgreSQL real habilitable en CI.
-- Documentar errores (`400`, `404`, `409`), limitaciones de seguridad y pasos de arranque.
+- Registrar cuenta, iniciar/cerrar sesión y consultar/editar el perfil propio desde API y React.
+- Separar perfil y credenciales; conservar todas las reglas del catálogo.
+- Rechazar escrituras de catálogo anónimas o de usuarios sin `CatalogAdmin`; validar CSRF y no aceptar un dueño del perfil enviado por el cliente.
+- Persistir cuentas/perfiles mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
+- Tests puros, HTTP aislados, aislamiento entre cuentas e integración PostgreSQL real habilitable en CI.
+- Documentar errores (`400`, `401`, `403`, `404`, `409`, `429`), asignación administrativa del rol y limitaciones.
 - No declarar que tests/build/migración corrieron si no existe evidencia de ejecución.

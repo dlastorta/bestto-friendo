@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { createGame, listGames, type Game } from './api'
 
-export function GamesCatalog() {
+export function GamesCatalog({ canCreate = false }: { canCreate?: boolean }) {
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingError, setLoadingError] = useState<string | null>(null)
@@ -68,7 +68,7 @@ export function GamesCatalog() {
       </div>
 
       <div className="catalog-layout">
-        <form className="game-form" onSubmit={(event) => void submitGame(event)}>
+        {canCreate ? <form className="game-form" onSubmit={(event) => void submitGame(event)}>
           <div className="form-header">
             <span className="form-icon" aria-hidden="true">+</span>
             <div>
@@ -132,7 +132,7 @@ export function GamesCatalog() {
           <button type="submit" className="primary-button" disabled={saving}>
             {saving ? 'Guardando…' : 'Crear juego'}
           </button>
-        </form>
+        </form> : <p className="catalog-empty">La creación de juegos está reservada a administradores del catálogo.</p>}
 
         <div className="catalog-list" aria-live="polite">
           {loading && <div className="catalog-empty">Cargando juegos…</div>}

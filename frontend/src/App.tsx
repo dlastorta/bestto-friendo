@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { fetchHealth, pendingHealth, type HealthCheck } from './features/system/health'
 import { GamesCatalog } from './features/games/GamesCatalog'
+import { AccountPanel } from './features/identity/AccountPanel'
+import type { PlayerProfile } from './features/identity/api'
 
 type ServiceCardProps = {
   label: string
@@ -32,6 +34,7 @@ function ServiceCard({ label, description, check, code }: ServiceCardProps) {
 }
 
 function App() {
+  const [profile, setProfile] = useState<PlayerProfile | null>(null)
   const [api, setApi] = useState<HealthCheck>(pendingHealth)
   const [database, setDatabase] = useState<HealthCheck>(pendingHealth)
   const [refreshing, setRefreshing] = useState(false)
@@ -59,7 +62,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 01</span>
+        <span className="milestone">SLICE 02</span>
       </header>
 
       <main className="main-content">
@@ -95,18 +98,19 @@ function App() {
           />
         </div>
 
-        <GamesCatalog />
+        <AccountPanel onChange={setProfile} />
+        <GamesCatalog canCreate={profile?.canManageCatalog ?? false} />
 
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 02 · Identidad del jugador</h2>
-            <p>Autenticación y perfiles para una biblioteca personal de mazos.</p>
+            <h2>Slice 03 · Biblioteca personal</h2>
+            <p>Tus mazos, asociados a tu cuenta y a cada juego.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>
 
-        <p className="footer-note">Slice 01 · Reglas en Domain · Persistencia aislada en Infrastructure.</p>
+        <p className="footer-note">Tu cuenta y tu perfil, separados de los resultados históricos.</p>
       </main>
     </div>
   )

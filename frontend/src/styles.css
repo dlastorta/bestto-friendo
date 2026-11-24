@@ -7,6 +7,9 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.account-section { margin-top: 48px; max-width: 540px; }
+.account-section > p { color: #9eb1ca; }
+
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
 button { font: inherit; }

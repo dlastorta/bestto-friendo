@@ -7,6 +7,7 @@ afterEach(() => vi.unstubAllGlobals())
 describe('Slice 01 · Catálogo', () => {
   it('permite crear un juego y mostrar las facciones devueltas por la API', async () => {
     const fetchMock = vi.fn(async (_url: string, options?: RequestInit) => {
+      if (_url === '/api/auth/csrf') return { ok: true, status: 200, json: async () => ({ token: 'test-csrf' }) }
       if (options?.method === 'POST') {
         return {
           ok: true,
@@ -21,7 +22,7 @@ describe('Slice 01 · Catálogo', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    render(<GamesCatalog />)
+    render(<GamesCatalog canCreate />)
     await screen.findByText('Todavía no hay juegos')
 
     fireEvent.change(screen.getByLabelText('Nombre del juego'), { target: { value: 'L5R' } })
@@ -39,10 +40,11 @@ describe('Slice 01 · Catálogo', () => {
   })
 
   it('expone errores de validación del backend sin agregar el juego', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (_url: string, options?: RequestInit) => options?.method === 'POST'
+    vi.stubGlobal('fetch', vi.fn(async (_url: string, options?: RequestInit) => _url === '/api/auth/csrf'
+      ? { ok: true, status: 200, json: async () => ({ token: 'test-csrf' }) } : options?.method === 'POST'
       ? { ok: false, status: 400, json: async () => ({ errors: { game: ['Facciones repetidas.'] } }) }
       : { ok: true, status: 200, json: async () => [] }))
-    render(<GamesCatalog />)
+    render(<GamesCatalog canCreate />)
     await screen.findByText('Todavía no hay juegos')
 
     fireEvent.change(screen.getByLabelText('Nombre del juego'), { target: { value: 'Magic' } })
@@ -64,5 +66,6 @@ describe('Slice 01 · Catálogo', () => {
 
     expect(await screen.findByText('1 a 5 facciones')).toBeInTheDocument()
     expect(screen.getByText('Blanco')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Crear juego' })).not.toBeInTheDocument()
   })
 })

@@ -62,11 +62,13 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 
 ## Calidad y seguridad
 
-- **Dependencias seguras (bloqueante):** no aceptar dependencias directas ni transitivas NuGet con vulnerabilidades conocidas de severidad **alta o crítica** (`NU1903` / `NU1904`). Corregir o actualizar la dependencia afectada antes de integrar cambios; nunca silenciar alertas sin una excepción documentada, justificada y aprobada.
+- **Dependencias seguras (bloqueante):** no aceptar dependencias directas ni transitivas NuGet o npm con vulnerabilidades conocidas de severidad **alta o crítica** (`NU1903` / `NU1904` para NuGet). Corregir o actualizar la dependencia afectada antes de integrar cambios; nunca silenciar alertas sin una excepción documentada, justificada y aprobada.
 - Ejecutar auditoría de dependencias en CI durante `dotnet restore` con `NuGetAuditMode=all`. Los avisos `NU1903` y `NU1904` deben hacer fallar el build. Revisar también las alertas moderadas y bajas para planificar su corrección.
 - Si una vulnerabilidad no tiene corrección disponible, no introducir la dependencia ni desplegar hasta evaluar explícitamente el riesgo y una alternativa segura.
 
 - Tests de comportamiento y no de estructura interna.
+- Los tests unitarios deben ser independientes de servicios externos. Los tests de integración deben controlar explícitamente sus dependencias; los mocks y reemplazos deben ser determinísticos y registrarse después de los servicios de producción.
+- Los tests frontend deben desmontar los componentes y limpiar el DOM entre ejecuciones mediante cleanup en la configuración global de tests.
 - No commitear secretos, tokens, `.env` reales ni credenciales de producción.
 - Configuración de desarrollo claramente diferenciada de producción.
 - Usar migraciones EF Core versionadas para modificaciones de esquema; nunca hacer `EnsureCreated` como sustituto.

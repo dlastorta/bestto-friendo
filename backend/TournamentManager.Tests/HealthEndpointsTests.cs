@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using TournamentManager.Application.Abstractions;
-using Microsoft.Extensions.Configuration;
 using TournamentManager.Api.Features.System;
 using Xunit;
 
@@ -65,16 +64,13 @@ public sealed class HealthEndpointsTests : IClassFixture<WebApplicationFactory<P
     [Fact]
     public async Task Readiness_ReturnsServiceUnavailable_WhenPostgresCannotBeReached()
     {
-        // Puerto 1 como destino deliberadamente inválido para mantener el test aislado.
         using var factory = _factory.WithWebHostBuilder(builder =>
         {
-            builder.ConfigureAppConfiguration((_, configuration) =>
+            builder.ConfigureTestServices(services =>
             {
-                configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:TournamentDb"] =
-                        "Host=127.0.0.1;Port=1;Database=missing;Username=missing;Password=missing;Timeout=1"
-                });
+                services.RemoveAll<IDatabaseReadinessProbe>();
+                services.AddScoped<IDatabaseReadinessProbe>(
+                    _ => new StubReadinessProbe(false));
             });
         });
         using var client = factory.CreateClient();

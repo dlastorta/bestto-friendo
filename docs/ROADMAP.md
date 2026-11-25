@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–03 integrados; Slice 04 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-25.
+Estado: Slices 01–04 integrados; Slice 05 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-25.
 
 ## Objetivo
 
@@ -101,3 +101,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 02:** identidad mínima, perfil propio y autorización del catálogo. Ver [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). No incluye mazos ni invitados.
 - **Slice 03:** biblioteca privada por juego, edición con revisiones y archivo. Lista de cartas literal, sin controles. Ver [`slices/03-BIBLIOTECA.md`](slices/03-BIBLIOTECA.md). No incluye snapshots de torneo.
 - **Slice 04:** borradores privados para organizadores, con creación/listado/consulta por juego. Ver [`slices/04-TORNEOS.md`](slices/04-TORNEOS.md).
+- **Slice 05:** configuración explícita de puntos, byes y orden de desempates solo en borrador; todavía sin cálculos. Ver [`slices/05-REGLAS.md`](slices/05-REGLAS.md).

@@ -20,6 +20,13 @@
 .tournament-detail { border: 1px solid #30425d; padding: 18px; border-radius: 8px; overflow-wrap: anywhere; }
 .tournament-detail dt { color: #9eb1ca; font-size: 13px; }
 .tournament-detail dd { margin: 5px 0 14px; }
+.tournament-rules fieldset { min-width: 0; border: 1px solid #30425d; border-radius: 8px; padding: 16px; margin: 16px 0; }
+.tournament-rules label { display: block; margin-top: 12px; }
+.tournament-rules input { display: block; width: 100%; padding: 10px; font: inherit; color: #e6eefb; background: #111e30; border: 1px solid #4a6587; border-radius: 6px; margin-top: 6px; }
+.tournament-rules p { color: #9eb1ca; font-size: 13px; line-height: 1.5; }
+.tournament-rules li { margin-bottom: 12px; }
+.rule-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tournament-rules button { margin: 4px; }
 @media (max-width: 700px) { .tournaments-layout { grid-template-columns: 1fr; } }
 
 .deck-library { margin-top: 60px; }

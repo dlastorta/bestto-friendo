@@ -87,6 +87,16 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 
 ## 6. Resultados, byes y desempates
 
+### Configuración del Slice 05
+
+- El organizador propietario configura las reglas solo en borrador. Los torneos comienzan sin configuración, sin puntajes por defecto.
+- Política técnica inicial: puntos entre 0 y 1000000, con hasta dos decimales; victoria, empate, derrota y bye se declaran por separado. No se impone una relación entre esos valores.
+- Byes habilitados/deshabilitados con puntaje propio; máximo uno por participante fijo, sin mecanismo de asignación todavía.
+- Se conserva una secuencia sin duplicados de Buchholz, OMW% y/o Buchholz con descarte. Puede estar vacía. Esta configuración no implementa fórmulas ni resuelve las variantes pendientes.
+- Un guardado desactualizado se rechaza; no se sobrescriben silenciosamente cambios de otra petición.
+
+### Reglas para los resultados futuros
+
 - Los resultados tienen un tipo específico: partida jugada, bye, forfeit/abandono o cualquier otra clase que definamos.
 - El bye da los puntos configurados; su efecto en cada fórmula de resistencia debe definirse por algoritmo, sin fabricar por defecto un rival con cero puntos.
 - Un jugador no puede recibir un segundo bye, incluso si es el peor clasificado. Si la asignación no es posible con las restricciones, el motor debe reportarlo.

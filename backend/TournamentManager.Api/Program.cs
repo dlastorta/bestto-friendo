@@ -9,6 +9,8 @@ using System.Threading.RateLimiting;
 using System.Security.Claims;
 using TournamentManager.Api.Features.Identity;
 using TournamentManager.Application.Features.Identity;
+using TournamentManager.Application.Features.Decks;
+using TournamentManager.Api.Features.Decks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentAccount, CurrentAccount>();
 builder.Services.AddScoped<RegisterAccountHandler>();
 builder.Services.AddScoped<PlayerProfileHandler>();
+builder.Services.AddScoped<DeckLibraryHandler>();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
@@ -85,6 +88,7 @@ app.UseRateLimiter();
 app.MapIdentityEndpoints();
 app.MapSystemEndpoints();
 app.MapGameEndpoints();
+app.MapDeckEndpoints();
 
 app.Run();
 

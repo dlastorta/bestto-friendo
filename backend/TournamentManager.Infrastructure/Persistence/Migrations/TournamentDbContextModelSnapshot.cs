@@ -227,6 +227,63 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Decks.Deck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentRevisionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("OwnerPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("OwnerPlayerId", "GameId", "IsArchived");
+
+                    b.ToTable("decks", (string)null);
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Decks.DeckRevision", b =>
+                {
+                    b.Property<Guid>("DeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ListText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.PrimitiveCollection<Guid[]>("_factionIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("faction_ids");
+
+                    b.HasKey("DeckId", "Number");
+
+                    b.ToTable("deck_revisions", (string)null);
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Games.Game", b =>
                 {
                     b.Property<Guid>("Id")
@@ -368,6 +425,30 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Decks.Deck", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Games.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerPlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Decks.DeckRevision", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Decks.Deck", null)
+                        .WithMany("Revisions")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Games.GameFaction", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Games.Game", null)
@@ -384,6 +465,11 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .HasForeignKey("TournamentManager.Domain.Players.Player", "AccountId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Decks.Deck", b =>
+                {
+                    b.Navigation("Revisions");
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Games.Game", b =>

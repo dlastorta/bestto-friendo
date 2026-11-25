@@ -51,8 +51,10 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 
 - Un jugador puede tener muchos mazos dentro de un juego.
 - Un mazo personal puede editarse, renombrarse o archivarse sin alterar inscripciones históricas.
-- La biblioteca puede mantener revisiones; nunca debe reescribir snapshots históricos.
-- La estructura inicial propuesta de la lista es texto libre + metadatos (nombre, juego, afiliaciones, etiquetas). La importación y validación por cartas quedan fuera del MVP.
+- Cada edición conserva una nueva revisión lógica; nunca debe reescribir versiones anteriores ni snapshots históricos.
+- **Confirmado el 2026-11-25:** lista en texto libre, destinada únicamente a mostrarse. Formato sugerido `N x Nombre de la carta` (N cantidad; x separador), sin parseo ni controles de formato, cartas, cantidades o legalidad. El texto se conserva literalmente; puede estar vacío o no seguir esa sugerencia. Importación y validación por cartas quedan fuera del MVP.
+- Slice 03 incluye nombre, juego y facciones como metadatos; etiquetas/arquetipos quedan pendientes. Las facciones respetan pertenencia y cardinalidad del catálogo.
+- Solo el propietario autenticado accede a la biblioteca, incluso si otra cuenta es administradora del catálogo. El juego queda fijo al crear; archivar conserva el historial y deja el mazo en modo consulta.
 
 ## 5. Presentación del mazo en un torneo
 

@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 02 (identidad mínima y autorización). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 03 (biblioteca personal). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -75,6 +75,16 @@ La migración `AddGamesCatalog` crea `games` y `game_factions`. El índice de no
 
 Ver contratos, límites de sesión, asignación del administrador y pruebas en [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). Google es mejora futura; no se introduce OAuth ni vinculación de cuentas ahora.
 
+## Implementación en Slice 03
+
+- `Domain/Decks`: agregado `Deck` con revisiones inmutables de nombre, lista literal y facciones; reutiliza las invariantes de `Game`. Sin parsing de cartas.
+- `Application/Features/Decks`: `DeckLibraryHandler` resuelve el propietario desde `ICurrentAccount` y `IPlayerProfiles`; `IDeckLibrary` consulta siempre por dueño. No hay bypass administrativo.
+- `Infrastructure/Decks`: consultas y commits EF. `Version` es token de concurrencia; `SaveChangesAsync` confirma revisión y cabecera en la misma transacción. Un conflicto no modifica el historial.
+- API autenticada bajo `/api/decks`, CSRF en escrituras, `404` indistinguible entre ajeno/inexistente y respuestas privadas sin caché.
+- React desmonta el estado privado al cambiar sesión; permite crear/editar/archivar y consultar revisiones. Las listas se muestran como texto escapado, nunca HTML.
+
+Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
+
 ## Fuera de alcance de este slice
 
-Biblioteca de mazos, invitados, torneos, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Invitados, torneos y sus snapshots, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.

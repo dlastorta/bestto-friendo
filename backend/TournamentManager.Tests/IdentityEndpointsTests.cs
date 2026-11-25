@@ -99,7 +99,7 @@ public sealed class IdentityEndpointsTests
         await IdentityTestSupport.SetCsrfAsync(client);
     }
 
-    private sealed class FakeAccounts : IAccountAccess, IPlayerProfiles
+    internal sealed class FakeAccounts : IAccountAccess, IPlayerProfiles
     {
         private readonly Dictionary<string, Player> players = new(StringComparer.OrdinalIgnoreCase);
         public bool CatalogAdmin { get; set; }

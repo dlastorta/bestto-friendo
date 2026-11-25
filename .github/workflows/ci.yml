@@ -51,7 +51,10 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         working-directory: frontend
-        run: npm install --no-audit --no-fund
+        run: npm ci
+      - name: Audit dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high
       - name: Tests
         working-directory: frontend
         run: npm test

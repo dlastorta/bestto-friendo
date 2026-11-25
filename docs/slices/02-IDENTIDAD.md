@@ -22,6 +22,8 @@ Todos los POST/PUT requieren la cabecera `X-CSRF-TOKEN` obtenida de `/api/auth/c
 
 ## Seguridad y límites
 
+- Los health checks se atienden anónimamente incluso si el navegador envía una cookie: no consultan cuentas. Liveness sigue devolviendo `200` sin base; readiness devuelve `503` cuando falla su probe.
+- Si guardar el perfil o cerrar sesión devuelve `401`, React limpia el perfil/permisos locales y muestra el login. Los errores de servidor o red no se interpretan como una sesión vencida.
 - ASP.NET Core Identity administra hash/salt de contraseñas, email único normalizado y bloqueo tras cinco contraseñas fallidas durante quince minutos. Contraseñas de 12 a 128 caracteres; sin imponer composición artificial.
 - Cuenta Identity y perfil se crean en una transacción; la unicidad de email y de cuenta/perfil también se impone en PostgreSQL.
 - Cookie de sesión HttpOnly, SameSite=Lax, duración máxima de ocho horas sin renovación deslizante. Secure obligatorio fuera de Development. CSRF es obligatorio incluso en login y registro.
@@ -79,8 +81,8 @@ Login con Google, solicitado y registrado en `docs/ROADMAP.md`. Requiere decidir
 
 ## Resultados locales — 2026-11-24
 
-- Backend: Ubuntu 24.04/WSL2, SDK .NET 10.0.115, PostgreSQL 16.15, base aislada `slice02_tests`. Restore/build correctos; 32/32 tests con `RUN_POSTGRES_INTEGRATION=true`, incluyendo cuentas, lockout, permiso de catálogo y persistencia real. Migraciones aplicadas; EF no detecta cambios de modelo pendientes.
-- Frontend: 7/7 tests y build TypeScript/Vite correctos en Windows. Auditorías npm y NuGet (incluidas transitivas) sin vulnerabilidades reportadas.
+- Backend: Ubuntu 24.04/WSL2, SDK .NET 10.0.115, PostgreSQL 16.15, base aislada `slice02_tests`. Restore/build correctos; 34/34 tests con `RUN_POSTGRES_INTEGRATION=true`, incluyendo cuentas, lockout, permiso de catálogo y persistencia real. Migraciones aplicadas; EF no detecta cambios de modelo pendientes.
+- Frontend: 11/11 tests y build TypeScript/Vite correctos en Windows. Auditorías npm y NuGet (incluidas transitivas) sin vulnerabilidades reportadas.
 - Límites de arquitectura comprobados con `scripts/verify_structure.py`.
 - Navegador contra API en WSL: registro/login, edición de perfil, persistencia al recargar, logout y ausencia del formulario de creación para el jugador normal verificados. Aislamiento entre dos cuentas y autorización administrativa cubiertos por tests HTTP/integración.
 - Windows nativo mantiene el bloqueo de Smart App Control sobre la DLL de dominio; no se modificó esa protección. El CI remoto con PostgreSQL 17 y la revisión del cambio siguen pendientes.

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { currentProfile, identityRequest, type PlayerProfile } from './api'
+import { AuthenticationError, currentProfile, identityRequest, type PlayerProfile } from './api'
 
 export function AccountPanel({ onChange }: { onChange: (profile: PlayerProfile | null) => void }) {
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
@@ -21,6 +21,15 @@ export function AccountPanel({ onChange }: { onChange: (profile: PlayerProfile |
     return () => { active = false }
   }, [onChange])
 
+  const clearSession = () => {
+    setProfile(null); onChange(null); setPassword(''); setDisplayName(''); setRegistering(false)
+  }
+
+  const handleError = (reason: unknown) => {
+    if (profile && reason instanceof AuthenticationError) clearSession()
+    setError(reason instanceof Error ? reason.message : 'No se pudo completar la operación.')
+  }
+
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setBusy(true); setError(null); setMessage(null)
     try {
@@ -33,7 +42,7 @@ export function AccountPanel({ onChange }: { onChange: (profile: PlayerProfile |
         const updated = await currentProfile()
         setProfile(updated); setDisplayName(updated?.displayName ?? ''); onChange(updated); setPassword('')
       }
-    } catch (reason) { setError((reason as Error).message) }
+    } catch (reason) { handleError(reason) }
     finally { setBusy(false) }
   }
 
@@ -41,8 +50,8 @@ export function AccountPanel({ onChange }: { onChange: (profile: PlayerProfile |
     setBusy(true); setError(null); setMessage(null)
     try {
       await identityRequest('/api/auth/logout', 'POST', {})
-      setProfile(null); onChange(null); setPassword(''); setDisplayName('')
-    } catch (reason) { setError((reason as Error).message) }
+      clearSession()
+    } catch (reason) { handleError(reason) }
     finally { setBusy(false) }
   }
 

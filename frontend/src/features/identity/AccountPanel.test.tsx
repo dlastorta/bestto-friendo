@@ -5,6 +5,37 @@ import { AccountPanel } from './AccountPanel'
 afterEach(() => vi.unstubAllGlobals())
 
 describe('Cuenta de jugador', () => {
+  it.each(['Cerrar sesión', 'Guardar perfil'])('vuelve al login si %s recibe 401', async (action) => {
+    const onChange = vi.fn()
+    vi.stubGlobal('fetch', vi.fn(async (url: string, options?: RequestInit) => ({
+      ok: !options?.method || options.method === 'GET',
+      status: !options?.method || options.method === 'GET' ? 200 : 401,
+      json: async () => url === '/api/auth/csrf' ? { token: 'csrf-test' }
+        : { id: 'player-1', displayName: 'Ana', canManageCatalog: true },
+    })))
+    render(<AccountPanel onChange={onChange} />)
+    fireEvent.click(await screen.findByRole('button', { name: action }))
+    expect(await screen.findByRole('button', { name: 'Iniciar sesión' })).toBeEnabled()
+    expect(screen.queryByRole('heading', { name: 'Mi perfil' })).not.toBeInTheDocument()
+    expect(onChange).toHaveBeenLastCalledWith(null)
+    expect(screen.getByLabelText('Contraseña')).toHaveValue('')
+  })
+
+  it.each(['Cerrar sesión', 'Guardar perfil'])('conserva la sesión si %s falla por un error de servidor', async (action) => {
+    const onChange = vi.fn()
+    vi.stubGlobal('fetch', vi.fn(async (url: string, options?: RequestInit) => ({
+      ok: !options?.method || options.method === 'GET',
+      status: !options?.method || options.method === 'GET' ? 200 : 500,
+      json: async () => url === '/api/auth/csrf' ? { token: 'csrf-test' }
+        : { id: 'player-1', displayName: 'Ana', canManageCatalog: true },
+    })))
+    render(<AccountPanel onChange={onChange} />)
+    fireEvent.click(await screen.findByRole('button', { name: action }))
+    await screen.findByRole('alert')
+    expect(screen.getByRole('heading', { name: 'Mi perfil' })).toBeInTheDocument()
+    expect(onChange).not.toHaveBeenCalledWith(null)
+  })
+
   it('registra, inicia sesión, edita el perfil y cierra sesión usando CSRF', async () => {
     let signedIn = false
     let name = 'Ana'

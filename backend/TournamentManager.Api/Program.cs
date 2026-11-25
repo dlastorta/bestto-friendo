@@ -29,6 +29,12 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
         options.SlidingExpiration = false;
         options.Events.OnValidatePrincipal = async context =>
         {
+            // Los health checks no usan identidad; una caída de cuentas no debe interceptarlos.
+            if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<HealthEndpointMetadata>() is not null)
+            {
+                context.RejectPrincipal();
+                return;
+            }
             var accounts = context.HttpContext.RequestServices.GetRequiredService<IAccountAccess>();
             if (!Guid.TryParse(context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier), out var id))
             {

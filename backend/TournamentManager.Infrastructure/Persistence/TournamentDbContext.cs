@@ -26,6 +26,18 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         tournament.Property(item => item.Id).ValueGeneratedNever();
         tournament.Property(item => item.Name).HasMaxLength(120).IsRequired();
         tournament.Property(item => item.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
+        tournament.Property(item => item.RulesVersion).IsConcurrencyToken();
+        tournament.HasOne(item => item.Rules).WithOne().HasForeignKey<TournamentRules>(item => item.TournamentId).OnDelete(DeleteBehavior.Cascade);
+        var rules = modelBuilder.Entity<TournamentRules>();
+        rules.ToTable("tournament_rules");
+        rules.HasKey(item => item.TournamentId);
+        rules.Property(item => item.TournamentId).ValueGeneratedNever();
+        rules.Property(item => item.WinPoints).HasPrecision(9, 2);
+        rules.Property(item => item.DrawPoints).HasPrecision(9, 2);
+        rules.Property(item => item.LossPoints).HasPrecision(9, 2);
+        rules.Property(item => item.ByePoints).HasPrecision(9, 2);
+        rules.Ignore(item => item.TieBreakers);
+        rules.Property<string[]>("_tieBreakers").HasColumnName("tie_breakers").HasColumnType("text[]").IsRequired();
         tournament.HasIndex(item => new { item.OrganizerPlayerId, item.GameId });
         tournament.HasOne<Player>().WithMany().HasForeignKey(item => item.OrganizerPlayerId).OnDelete(DeleteBehavior.Restrict);
         tournament.HasOne<Game>().WithMany().HasForeignKey(item => item.GameId).OnDelete(DeleteBehavior.Restrict);

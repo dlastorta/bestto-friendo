@@ -23,6 +23,11 @@ public static class TournamentEndpoints
             var result = await handler.GetAsync(id, ct);
             return result is null ? Results.NotFound() : Results.Ok(result);
         });
+        tournaments.MapPut("/{id:guid}/rules", async (Guid id, ConfigureTournamentRules command, TournamentDraftsHandler handler, CancellationToken ct) =>
+        {
+            var result = await handler.ConfigureRulesAsync(id, command, ct);
+            return result is null ? Results.NotFound() : Results.Ok(result);
+        });
         return endpoints;
     }
 }
@@ -35,6 +40,7 @@ public sealed class TournamentErrorsFilter : IEndpointFilter
         try { return await next(context); }
         catch (UnauthorizedAccessException) { return Results.Unauthorized(); }
         catch (TournamentAccessDeniedException) { return Results.Forbid(); }
+        catch (TournamentConflictException ex) { return Results.Conflict(new { message = ex.Message }); }
         catch (TournamentRuleViolationException ex)
         { return Results.ValidationProblem(new Dictionary<string, string[]> { ["tournament"] = [ex.Message] }); }
     }

@@ -5,13 +5,18 @@ using TournamentManager.Domain.Tournaments;
 namespace TournamentManager.Application.Features.Tournaments;
 
 public sealed record CreateTournamentDraft(string? Name, Guid GameId);
-public sealed record TournamentDto(Guid Id, string Name, Guid GameId, string Status);
+public sealed record TournamentDto(Guid Id, string Name, Guid GameId, string Status, int RulesVersion = 0, TournamentRulesDto? Rules = null);
+public sealed record TournamentRulesDto(decimal WinPoints, decimal DrawPoints, decimal LossPoints,
+    bool ByesEnabled, decimal ByePoints, int MaximumByesPerParticipant, IReadOnlyList<string> TieBreakers);
+public sealed record ConfigureTournamentRules(decimal? WinPoints, decimal? DrawPoints, decimal? LossPoints,
+    bool? ByesEnabled, decimal? ByePoints, string[]? TieBreakers, int? ExpectedVersion);
 
 public interface ITournamentDrafts
 {
     Task AddAsync(Tournament tournament, CancellationToken ct);
     Task<IReadOnlyList<Tournament>> ListOwnedAsync(Guid organizerPlayerId, Guid? gameId, CancellationToken ct);
     Task<Tournament?> FindOwnedAsync(Guid id, Guid organizerPlayerId, CancellationToken ct);
+    Task SaveAsync(Tournament tournament, CancellationToken ct);
 }
 
 public sealed class TournamentAccessDeniedException : Exception;
@@ -48,6 +53,21 @@ public sealed class TournamentDraftsHandler(ICurrentAccount current, IPlayerProf
         return tournament is null ? null : ToDto(tournament);
     }
 
+    public async Task<TournamentDto?> ConfigureRulesAsync(Guid id, ConfigureTournamentRules command, CancellationToken ct)
+    {
+        var tournament = await drafts.FindOwnedAsync(id, await OrganizerAsync(ct), ct);
+        if (tournament is null) return null;
+        if (command.WinPoints is null || command.DrawPoints is null || command.LossPoints is null ||
+            command.ByesEnabled is null || command.ByePoints is null || command.ExpectedVersion is null)
+            throw new TournamentRuleViolationException("Debés indicar todos los puntajes, la política de bye y la versión esperada.");
+        tournament.ConfigureRules(command.WinPoints.Value, command.DrawPoints.Value, command.LossPoints.Value,
+            command.ByesEnabled.Value, command.ByePoints.Value, command.TieBreakers, command.ExpectedVersion.Value);
+        await drafts.SaveAsync(tournament, ct);
+        return ToDto(tournament);
+    }
+
     private static TournamentDto ToDto(Tournament tournament) =>
-        new(tournament.Id, tournament.Name, tournament.GameId, tournament.Status.ToString());
+        new(tournament.Id, tournament.Name, tournament.GameId, tournament.Status.ToString(), tournament.RulesVersion,
+            tournament.Rules is { } rules ? new(rules.WinPoints, rules.DrawPoints, rules.LossPoints,
+                rules.ByesEnabled, rules.ByePoints, TournamentRules.MaximumByesPerParticipant, rules.TieBreakers.ToArray()) : null);
 }

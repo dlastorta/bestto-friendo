@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 04: Torneos en borrador
+## Estado — Slice 05: Reglas de torneo
 
 Implementado en código:
 
@@ -20,6 +20,8 @@ El Slice 02 agrega registro por email/contraseña, sesión por cookie HttpOnly y
 El Slice 03 agrega biblioteca privada: crear, consultar, editar y archivar mazos por juego. Cada edición conserva una revisión; la lista es texto libre para mostrar, sin controles de cartas ni cantidades (`N x Nombre de la carta` es solo una sugerencia). Solo el dueño puede acceder, incluidos frente a administradores del catálogo. Aplicar la migración `AddDeckLibrary` con el comando habitual de abajo. Ver [contratos, concurrencia y verificaciones](docs/slices/03-BIBLIOTECA.md).
 
 El Slice 04 permite crear/listar/consultar torneos borrador de un juego válido. Requiere el rol **`TournamentOrganizer`**, separado de `CatalogAdmin` y sin asignación automática al registrarse. Los borradores son privados del creador; no incluyen aún inscripciones ni puntuación. Aplicar `AddTournamentDrafts` y asignar el rol con `scripts/grant-tournament-organizer.sql`. Ver [contratos, permisos y verificaciones](docs/slices/04-TORNEOS.md). Swagger UI queda pendiente para el final; OpenAPI JSON está disponible en desarrollo.
+
+El Slice 05 agrega configuración de puntos por resultado, política de bye y orden de desempates desde el detalle del torneo, solo para el organizador propietario y en borrador. Los torneos quedan inicialmente sin configurar y cada guardado controla la versión para evitar sobrescrituras. Aplicar `AddTournamentRules`. No calcula clasificaciones, fórmulas ni asigna byes todavía. Ver [contratos y verificación](docs/slices/05-REGLAS.md).
 
 Documentos: [`AGENTS.md`](AGENTS.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/TOURNAMENT_RULES.md`](docs/TOURNAMENT_RULES.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/slices/01-CATALOGO.md`](docs/slices/01-CATALOGO.md).
 

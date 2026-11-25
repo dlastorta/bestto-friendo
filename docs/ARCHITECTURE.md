@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 04 (torneos borrador). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 05 (configuración de reglas). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -87,7 +87,15 @@ Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
 
 ## Fuera de alcance de este slice
 
-Inscripciones y snapshots, invitados, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Inscripciones y snapshots, invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+
+## Implementación en Slice 05
+
+- `Tournament` controla edición en borrador y versión; `TournamentRules` valida puntos y códigos/duplicados de una secuencia ordenada con copia defensiva.
+- `TournamentDraftsHandler` conserva autorización/propiedad y recibe un comando explícito de configuración. Campos faltantes no se convierten silenciosamente en cero o false.
+- El puerto existente agrega `SaveAsync`. El adaptador carga reglas y guarda cabecera/configuración en una transacción; `RulesVersion` es token de concurrencia. La creación simultánea de la primera configuración también se traduce a conflicto.
+- Migración `AddTournamentRules`, relación opcional 1:1, decimales y array de códigos. No hay reglas por defecto ni EF en capas internas.
+- React incorpora editor de reglas en el detalle, con cambios de orden, conflictos conservando formulario y recarga explícita. Los cálculos de clasificación no forman parte de esta feature.
 
 ## Implementación en Slice 04
 

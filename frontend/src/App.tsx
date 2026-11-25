@@ -66,7 +66,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 04</span>
+        <span className="milestone">SLICE 05</span>
       </header>
 
       <main className="main-content">
@@ -110,8 +110,8 @@ function App() {
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 05 · Reglas de torneo</h2>
-            <p>Configurar puntuación, byes y criterios de desempate.</p>
+            <h2>Slice 06 · Inscripciones y mazos</h2>
+            <p>Inscribir jugadores y conservar el mazo presentado.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

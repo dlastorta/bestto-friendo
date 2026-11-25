@@ -9,6 +9,21 @@ public sealed class Tournament
     public Guid GameId { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public TournamentStatus Status { get; private set; }
+    public int RulesVersion { get; private set; }
+    public TournamentRules? Rules { get; private set; }
+
+    public void ConfigureRules(decimal win, decimal draw, decimal loss, bool byesEnabled, decimal bye,
+        IEnumerable<string>? tieBreakers, int expectedVersion)
+    {
+        if (Status != TournamentStatus.Draft)
+            throw new TournamentConflictException("Solo se pueden modificar reglas en borrador.");
+        if (RulesVersion != expectedVersion)
+            throw new TournamentConflictException("Las reglas cambiaron. Recargá antes de guardar.");
+        var rules = TournamentRules.Create(Id, win, draw, loss, byesEnabled, bye, tieBreakers);
+        if (Rules is null) Rules = rules;
+        else Rules.Apply(rules);
+        RulesVersion++;
+    }
 
     public static Tournament CreateDraft(Guid organizerPlayerId, Guid gameId, string? name)
     {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { listGames, type Game } from '../games/api'
 import { AuthenticationError } from '../identity/api'
 import { tournamentRequest, TournamentPermissionError, type Tournament } from './api'
+import { TournamentRulesEditor } from './TournamentRulesEditor'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -87,7 +88,8 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
         {selected && <article className="tournament-detail" aria-labelledby="tournament-detail-heading">
           <h3 id="tournament-detail-heading">Detalle del torneo</h3>
           <dl><dt>Nombre</dt><dd>{selected.name}</dd><dt>Juego</dt><dd>{games.find(game => game.id === selected.gameId)?.name}</dd>
-            <dt>Estado</dt><dd>Borrador</dd><dt>Visibilidad</dt><dd>Privado</dd></dl>
+            <dt>Estado</dt><dd>{selected.status === 'Draft' ? 'Borrador' : selected.status}</dd><dt>Visibilidad</dt><dd>Privado</dd></dl>
+          <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}`} tournament={selected} onSaved={setSelected} onAccessLost={onAccessLost} />
         </article>}
       </div>
     </div>

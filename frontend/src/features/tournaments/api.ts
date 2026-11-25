@@ -1,11 +1,12 @@
 import { AuthenticationError, csrfHeaders } from '../identity/api'
 
-export type Tournament = { id: string; name: string; gameId: string; status: 'Draft' }
+export type TournamentRules = { winPoints: number; drawPoints: number; lossPoints: number; byesEnabled: boolean; byePoints: number; maximumByesPerParticipant: number; tieBreakers: string[] }
+export type Tournament = { id: string; name: string; gameId: string; status: string; rulesVersion: number; rules: TournamentRules | null }
 export class TournamentPermissionError extends Error {}
 
-export async function tournamentRequest<T>(path = '', body?: { name: string; gameId: string }): Promise<T> {
+export async function tournamentRequest<T>(path = '', body?: unknown, method = body ? 'POST' : 'GET'): Promise<T> {
   const response = await fetch(`/api/tournaments${path}`, {
-    method: body ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store',
+    method, credentials: 'same-origin', cache: 'no-store',
     headers: body ? await csrfHeaders() : { Accept: 'application/json' },
     ...(body ? { body: JSON.stringify(body) } : {}),
   })

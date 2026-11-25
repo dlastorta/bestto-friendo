@@ -68,10 +68,23 @@ public sealed class TournamentEndpointsTests
         Assert.Equal(HttpStatusCode.NotFound, (await other.GetAsync(path)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await owner.GetAsync($"/api/tournaments/{Guid.NewGuid()}")).StatusCode);
         Assert.Equal("no-store", (await owner.GetAsync(path)).Headers.CacheControl!.ToString());
+        var rules = new ConfigureTournamentRules(3, 1, 0, true, 3, ["OMWPercentage", "Buchholz"], 0);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(path + "/rules", rules)).StatusCode);
+        owner.DefaultRequestHeaders.Remove("X-CSRF-TOKEN");
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PutAsJsonAsync(path + "/rules", rules)).StatusCode);
+        await IdentityTestSupport.SetCsrfAsync(owner);
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PutAsJsonAsync(path + "/rules", new { })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PutAsJsonAsync(path + "/rules", rules with { TieBreakers = ["Unknown"] })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await owner.PutAsJsonAsync(path + "/rules", rules)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await owner.PutAsJsonAsync(path + "/rules", rules)).StatusCode);
+        var configured = (await owner.GetFromJsonAsync<TournamentDto>(path))!;
+        Assert.Equal(1, configured.RulesVersion);
+        Assert.Equal(new[] { "OMWPercentage", "Buchholz" }, configured.Rules!.TieBreakers);
         accounts.TournamentOrganizer = false;
         Assert.False((await owner.GetFromJsonAsync<PlayerProfile>("/api/me"))!.CanOrganizeTournaments);
         Assert.Equal(HttpStatusCode.Forbidden, (await owner.GetAsync(path)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await owner.PostAsJsonAsync("/api/tournaments", command)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await owner.PutAsJsonAsync(path + "/rules", rules)).StatusCode);
     }
 
     private sealed class MemoryGames : IGameCatalog
@@ -85,6 +98,7 @@ public sealed class TournamentEndpointsTests
 
     private sealed class MemoryDrafts : ITournamentDrafts
     {
+        public Task SaveAsync(Tournament tournament, CancellationToken ct) => Task.CompletedTask;
         private readonly List<Tournament> tournaments = [];
         public Task AddAsync(Tournament tournament, CancellationToken ct) { tournaments.Add(tournament); return Task.CompletedTask; }
         public Task<Tournament?> FindOwnedAsync(Guid id, Guid owner, CancellationToken ct) =>

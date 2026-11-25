@@ -7,6 +7,7 @@ using TournamentManager.Application.Features.Games;
 using TournamentManager.Application.Features.Identity;
 using TournamentManager.Application.Features.Tournaments;
 using TournamentManager.Domain.Games;
+using TournamentManager.Domain.Tournaments;
 using Xunit;
 
 namespace TournamentManager.Tests;
@@ -49,6 +50,30 @@ public sealed class PostgresTournamentIntegrationTests
         Assert.Empty((await owner.GetFromJsonAsync<TournamentDto[]>($"/api/tournaments?gameId={Guid.NewGuid()}"))!);
         Assert.Empty((await other.GetFromJsonAsync<TournamentDto[]>($"/api/tournaments?gameId={game.Id}"))!);
         Assert.Equal(HttpStatusCode.NotFound, (await other.GetAsync($"/api/tournaments/{first.Id}")).StatusCode);
+        var ownerId = (await owner.GetFromJsonAsync<PlayerProfile>("/api/me"))!.Id;
+        using (var firstScope = factory.Services.CreateScope())
+        using (var secondScope = factory.Services.CreateScope())
+        {
+            var storeA = firstScope.ServiceProvider.GetRequiredService<ITournamentDrafts>();
+            var storeB = secondScope.ServiceProvider.GetRequiredService<ITournamentDrafts>();
+            var a = (await storeA.FindOwnedAsync(first.Id, ownerId, default))!;
+            var b = (await storeB.FindOwnedAsync(first.Id, ownerId, default))!;
+            a.ConfigureRules(2.5m, 1, 0, true, 2, ["OMWPercentage", "Buchholz"], 0);
+            b.ConfigureRules(5, 1, 0, false, 0, ["BuchholzCut"], 0);
+            await storeA.SaveAsync(a, default);
+            await Assert.ThrowsAsync<TournamentConflictException>(() => storeB.SaveAsync(b, default));
+        }
+        var path = $"/api/tournaments/{first.Id}";
+        var saved = (await owner.GetFromJsonAsync<TournamentDto>(path))!;
+        Assert.Equal(2.5m, saved.Rules!.WinPoints);
+        Assert.Equal(new[] { "OMWPercentage", "Buchholz" }, saved.Rules.TieBreakers);
+        var reordered = new ConfigureTournamentRules(3, 0.5m, 0, false, 2, ["Buchholz", "OMWPercentage"], saved.RulesVersion);
+        Assert.Equal(HttpStatusCode.OK, (await owner.PutAsJsonAsync(path + "/rules", reordered)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await owner.PutAsJsonAsync(path + "/rules", reordered)).StatusCode);
+        var latest = (await owner.GetFromJsonAsync<TournamentDto>(path))!;
+        Assert.Equal(2, latest.RulesVersion);
+        Assert.False(latest.Rules!.ByesEnabled);
+        Assert.Equal(new[] { "Buchholz", "OMWPercentage" }, latest.Rules.TieBreakers);
         using (var scope = factory.Services.CreateScope())
         {
             var users = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<Guid>>>();

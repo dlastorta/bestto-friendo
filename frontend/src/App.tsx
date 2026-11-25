@@ -3,6 +3,7 @@ import { fetchHealth, pendingHealth, type HealthCheck } from './features/system/
 import { GamesCatalog } from './features/games/GamesCatalog'
 import { AccountPanel } from './features/identity/AccountPanel'
 import type { PlayerProfile } from './features/identity/api'
+import { DeckLibrary } from './features/decks/DeckLibrary'
 
 type ServiceCardProps = {
   label: string
@@ -35,6 +36,8 @@ function ServiceCard({ label, description, check, code }: ServiceCardProps) {
 
 function App() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
+  const [sessionKey, setSessionKey] = useState(0)
+  const expireSession = useCallback(() => { setProfile(null); setSessionKey(value => value + 1) }, [])
   const [api, setApi] = useState<HealthCheck>(pendingHealth)
   const [database, setDatabase] = useState<HealthCheck>(pendingHealth)
   const [refreshing, setRefreshing] = useState(false)
@@ -62,7 +65,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 02</span>
+        <span className="milestone">SLICE 03</span>
       </header>
 
       <main className="main-content">
@@ -98,14 +101,15 @@ function App() {
           />
         </div>
 
-        <AccountPanel onChange={setProfile} />
+        <AccountPanel key={sessionKey} onChange={setProfile} />
+        {profile && <DeckLibrary key={profile.id} onSessionExpired={expireSession} />}
         <GamesCatalog canCreate={profile?.canManageCatalog ?? false} />
 
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 03 · Biblioteca personal</h2>
-            <p>Tus mazos, asociados a tu cuenta y a cada juego.</p>
+            <h2>Slice 04 · Crear torneos</h2>
+            <p>Torneos borrador asociados a un juego.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

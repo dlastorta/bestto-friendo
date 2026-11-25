@@ -9,6 +9,8 @@ using TournamentManager.Infrastructure.Health;
 using TournamentManager.Infrastructure.Persistence;
 using TournamentManager.Application.Features.Identity;
 using TournamentManager.Infrastructure.Identity;
+using TournamentManager.Application.Features.Decks;
+using TournamentManager.Infrastructure.Decks;
 
 namespace TournamentManager.Infrastructure;
 
@@ -43,6 +45,7 @@ public static class DependencyInjection
         services.AddScoped<IPlayerProfiles, PlayerProfiles>();
         services.AddScoped<IDatabaseReadinessProbe, PostgresReadinessProbe>();
         services.AddScoped<IGameCatalog, EfGameCatalog>();
+        services.AddScoped<IDeckLibrary, EfDeckLibrary>();
 
         return services;
     }

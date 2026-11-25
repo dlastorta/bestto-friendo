@@ -10,6 +10,25 @@
 .account-section { margin-top: 48px; max-width: 540px; }
 .account-section > p { color: #9eb1ca; }
 
+.deck-library { margin-top: 60px; }
+.deck-layout { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr); gap: 24px; }
+.deck-filters, .deck-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin: 18px 0; }
+.deck-library label { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.deck-library input:not([type=checkbox]), .deck-library select, .deck-library textarea { width: 100%; font: inherit; color: #e6eefb; background: #111e30; border: 1px solid #4a6587; border-radius: 6px; padding: 10px; }
+.deck-library textarea { resize: vertical; }
+.deck-library fieldset { min-width: 0; border: 1px solid #30425d; border-radius: 8px; padding: 16px; margin: 0 0 16px; }
+.deck-library .check-label { flex-direction: row; align-items: center; }
+.deck-library p, .deck-library small { color: #9eb1ca; }
+.deck-library [role=alert] { color: #ffc3ac; }
+.deck-list { list-style: none; padding: 0; }
+.deck-list li { margin-bottom: 14px; }
+.deck-list button { width: 100%; text-align: left; overflow-wrap: anywhere; }
+.deck-list small { display: block; padding: 6px; }
+.deck-library details { border-top: 1px solid #30425d; padding: 14px 0; }
+.deck-library summary { cursor: pointer; overflow-wrap: anywhere; }
+.deck-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+@media (max-width: 700px) { .deck-layout { grid-template-columns: 1fr; } }
+
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
 button { font: inherit; }

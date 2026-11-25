@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TournamentManager.Domain.Games;
 using TournamentManager.Domain.Players;
+using TournamentManager.Domain.Decks;
 
 namespace TournamentManager.Infrastructure.Persistence;
 
@@ -12,10 +13,30 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
 {
     public DbSet<Game> Games => Set<Game>();
     public DbSet<Player> Players => Set<Player>();
+    public DbSet<Deck> Decks => Set<Deck>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var deck = modelBuilder.Entity<Deck>();
+        deck.ToTable("decks");
+        deck.HasKey(item => item.Id);
+        deck.Property(item => item.Id).ValueGeneratedNever();
+        deck.Property(item => item.Version).IsConcurrencyToken();
+        deck.Ignore(item => item.CurrentRevision);
+        deck.HasIndex(item => new { item.OwnerPlayerId, item.GameId, item.IsArchived });
+        deck.HasOne<Player>().WithMany().HasForeignKey(item => item.OwnerPlayerId).OnDelete(DeleteBehavior.Restrict);
+        deck.HasOne<Game>().WithMany().HasForeignKey(item => item.GameId).OnDelete(DeleteBehavior.Restrict);
+        deck.HasMany(item => item.Revisions).WithOne().HasForeignKey(item => item.DeckId).OnDelete(DeleteBehavior.Restrict);
+        deck.Navigation(item => item.Revisions).HasField("_revisions").UsePropertyAccessMode(PropertyAccessMode.Field);
+        var revision = modelBuilder.Entity<DeckRevision>();
+        revision.ToTable("deck_revisions");
+        revision.HasKey(item => new { item.DeckId, item.Number });
+        revision.Property(item => item.Number).ValueGeneratedNever();
+        revision.Property(item => item.Name).HasMaxLength(120).IsRequired();
+        revision.Property(item => item.ListText).IsRequired();
+        revision.Ignore(item => item.FactionIds);
+        revision.Property<Guid[]>("_factionIds").HasColumnName("faction_ids").HasColumnType("uuid[]").IsRequired();
         modelBuilder.Entity<IdentityRole<Guid>>().HasData(new IdentityRole<Guid>
         {
             Id = Guid.Parse("663147a8-7ec9-44dd-955c-ce06653cdf45"),

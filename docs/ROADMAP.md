@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slice 01 verificado; Slice 02 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-24.
+Estado: Slices 01 y 02 integrados; Slice 03 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-25.
 
 ## Objetivo
 
@@ -77,9 +77,12 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
    - Los límites de dependencia entre Domain, Application, Infrastructure y API pasan los checks de arquitectura.
 7. Documentación de reglas y decisiones actualizada.
 
+## Lista de cartas confirmada
+
+- Formato de listas confirmado: texto libre para mostrar, con `N x Nombre de la carta` como sugerencia, sin validación de cartas ni cantidades.
+
 ## Decisiones aún pendientes
 
-- Formato exacto de listas (texto plano en la primera versión es una propuesta).
 - Facciones principales/secundarias, combinación de colores y sus restricciones por juego/formato.
 - Si la inscripción requiere mazo de manera obligatoria para todos los juegos/eventos.
 - Qué actores pueden cambiar una presentación de mazo antes del inicio.
@@ -92,3 +95,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 
 - **Slice 01:** catálogo y reglas conservados. Ver [`slices/01-CATALOGO.md`](slices/01-CATALOGO.md).
 - **Slice 02:** identidad mínima, perfil propio y autorización del catálogo. Ver [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). No incluye mazos ni invitados.
+- **Slice 03:** biblioteca privada por juego, edición con revisiones y archivo. Lista de cartas literal, sin controles. Ver [`slices/03-BIBLIOTECA.md`](slices/03-BIBLIOTECA.md). No incluye snapshots de torneo.

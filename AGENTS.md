@@ -9,13 +9,13 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 02 — Identidad mínima de jugador
+## Slice actual: 03 — Biblioteca personal de mazos
 
-**Permitido:** mantener el catálogo del Slice 01 e incorporar registro por email/contraseña, sesión por cookie, perfil propio y autorización del catálogo. Solo `CatalogAdmin` puede crear juegos; el registro no concede ese rol. Persistencia e Identity/EF confinados a Infrastructure, HTTP en API, reglas puras en Domain y casos de uso/puertos en Application. Ver `docs/slices/02-IDENTIDAD.md`.
+**Permitido:** mantener catálogo e identidad; crear/listar/consultar/editar/archivar mazos propios por juego y conservar revisiones. Lista literal sin validaciones de cartas, cantidades ni formato; `N x Nombre de la carta` es una sugerencia. Ver `docs/slices/03-BIBLIOTECA.md`. Persistencia y EF solo en Infrastructure.
 
-**No permitido en Slice 02:** biblioteca de mazos, torneos, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos ni conciliación de invitados. Login con Google es mejora futura; no implementarlo en este slice.
+**No permitido en Slice 03:** torneos y sus snapshots, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Login con Google es mejora futura.
 
-**Seguridad temporal:** las escrituras requieren sesión, rol de administrador de catálogo y CSRF; el perfil se determina por la cuenta autenticada. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
+**Seguridad temporal:** crear juegos requiere `CatalogAdmin`; perfil y biblioteca se determinan por la cuenta autenticada, sin privilegios administrativos sobre mazos ajenos. Escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
 ## Enfoque arquitectónico
 
@@ -75,12 +75,14 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 02
+## Definition of Done — Slice 03
 
-- Registrar cuenta, iniciar/cerrar sesión y consultar/editar el perfil propio desde API y React.
+- Crear/listar/consultar/editar/archivar mazos propios desde API y React, con historial de revisiones inmutables.
+- Conservar texto de lista literal; validar juego y facciones sin parsear cartas.
+- Impedir lecturas/escrituras ajenas y pérdida de cambios concurrentes; cerrar la vista privada al terminar la sesión.
 - Separar perfil y credenciales; conservar todas las reglas del catálogo.
-- Rechazar escrituras de catálogo anónimas o de usuarios sin `CatalogAdmin`; validar CSRF y no aceptar un dueño del perfil enviado por el cliente.
-- Persistir cuentas/perfiles mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
+- Conservar autorización del catálogo; validar CSRF y no aceptar un dueño del perfil o mazo enviado por el cliente.
+- Persistir mazos y revisiones mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
 - Tests puros, HTTP aislados, aislamiento entre cuentas e integración PostgreSQL real habilitable en CI.
-- Documentar errores (`400`, `401`, `403`, `404`, `409`, `429`), asignación administrativa del rol y limitaciones.
+- Documentar contratos, conflictos de versión, archivo y limitaciones; conservar la documentación de cuentas y catálogo.
 - No declarar que tests/build/migración corrieron si no existe evidencia de ejecución.

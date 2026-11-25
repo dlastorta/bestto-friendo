@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 02: Identidad mínima de jugador
+## Estado — Slice 03: Biblioteca personal de mazos
 
 Implementado en código:
 
@@ -16,6 +16,8 @@ Implementado en código:
 El Slice 02 agrega registro por email/contraseña, sesión por cookie HttpOnly y perfil propio. Crear juegos requiere el rol `CatalogAdmin`; registrarse no concede ese rol. Las lecturas del catálogo siguen siendo públicas. Ver [contratos, asignación del administrador y límites de seguridad](docs/slices/02-IDENTIDAD.md).
 
 **No desplegar esta versión públicamente:** faltan verificación de email, recuperación de cuenta y preparación operativa de seguridad. El login con Google está registrado como mejora futura.
+
+El Slice 03 agrega biblioteca privada: crear, consultar, editar y archivar mazos por juego. Cada edición conserva una revisión; la lista es texto libre para mostrar, sin controles de cartas ni cantidades (`N x Nombre de la carta` es solo una sugerencia). Solo el dueño puede acceder, incluidos frente a administradores del catálogo. Aplicar la migración `AddDeckLibrary` con el comando habitual de abajo. Ver [contratos, concurrencia y verificaciones](docs/slices/03-BIBLIOTECA.md).
 
 Documentos: [`AGENTS.md`](AGENTS.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/TOURNAMENT_RULES.md`](docs/TOURNAMENT_RULES.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/slices/01-CATALOGO.md`](docs/slices/01-CATALOGO.md).
 

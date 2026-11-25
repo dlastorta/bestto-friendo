@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -23,6 +24,7 @@ public sealed class GameCatalogTests : IClassFixture<WebApplicationFactory<Progr
         var catalog = new FakeCatalog();
         using var factory = WithFakeCatalog(catalog);
         using var client = factory.CreateClient();
+        await IdentityTestSupport.SetCsrfAsync(client);
         var create = new CreateGameCommand("Magic", ["Blanco", "Azul", "Negro"], 1, 3);
 
         var post = await client.PostAsJsonAsync("/api/games", create);
@@ -47,6 +49,7 @@ public sealed class GameCatalogTests : IClassFixture<WebApplicationFactory<Progr
     {
         using var factory = WithFakeCatalog(new FakeCatalog());
         using var client = factory.CreateClient();
+        await IdentityTestSupport.SetCsrfAsync(client);
 
         var result = await client.PostAsJsonAsync("/api/games", new CreateGameCommand(
             "L5R", ["León", "león"], 1, 1));
@@ -59,6 +62,7 @@ public sealed class GameCatalogTests : IClassFixture<WebApplicationFactory<Progr
     {
         using var factory = WithFakeCatalog(new FakeCatalog());
         using var client = factory.CreateClient();
+        await IdentityTestSupport.SetCsrfAsync(client);
 
         var first = await client.PostAsJsonAsync("/api/games", new CreateGameCommand(
             "Magic", ["Blanco"], 1, 1));
@@ -85,6 +89,8 @@ public sealed class GameCatalogTests : IClassFixture<WebApplicationFactory<Progr
         {
             services.RemoveAll<IGameCatalog>();
             services.AddSingleton<IGameCatalog>(catalog);
+            services.AddAuthentication("CatalogTest")
+                .AddScheme<AuthenticationSchemeOptions, CatalogAdminTestAuthentication>("CatalogTest", _ => { });
         }));
 
     private sealed class FakeCatalog : IGameCatalog

@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: roadmap aprobado. Slice 00 entregado como base (verificaciones de ejecución pendientes); Slice 01 implementado en código, pendiente de build/tests/migraciones locales. Actualizado el 2026-11-22.
+Estado: Slice 01 verificado; Slice 02 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-24.
 
 ## Objetivo
 
@@ -21,7 +21,7 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 |---|---|---|
 | 00. Bootstrap | Monorepo, API, React, PostgreSQL, migraciones y health check. | La solución corre localmente; pipeline de tests básico. |
 | 01. Catálogo de juegos | Crear/listar juegos y definir sus afiliaciones/facciones y reglas de selección (una o varias). | No se puede asignar una facción de otro juego. |
-| 02. Identidad mínima de jugador | Cuenta de usuario y perfil de jugador para que la biblioteca sea *personal*. | Un usuario autenticado solo puede editar sus propios mazos. Se pueden representar participantes invitados cuando corresponda. |
+| 02. Identidad mínima de jugador | Cuenta por email/contraseña, sesión por cookie y perfil propio. | Registro/login/logout, aislamiento de perfiles y creación de juegos solo para administradores del catálogo. La propiedad de mazos se verificará en Slice 03; invitados y conciliación siguen pendientes. |
 | 03. Biblioteca personal de mazos | Crear, listar, consultar, editar y archivar mazos por juego. | Un jugador mantiene varios mazos; editar uno genera una nueva revisión lógica y no altera versiones utilizadas en torneos. |
 | 04. Crear torneos | Crear/listar/consultar torneos borrador, asociados a juego y eventualmente formato. | Torneo asociado a un juego válido. |
 | 05. Reglas de torneo | Configurar puntos por resultado, política de bye y secuencia ordenada de criterios de desempate. | Orden de desempate persistido; configuración editable solo en borrador. |
@@ -51,6 +51,10 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 - Múltiples mazos por jugador en un mismo torneo o cambio entre rondas (si un reglamento lo requiere, será feature separado).
 - Cálculo automático de estrategia/arquetipo a partir de cartas.
 - Integración automática con páginas de terceros para publicación.
+
+## Mejora futura — Inicio de sesión con Google
+
+Solicitada el 2026-11-24. Incorporar Google como proveedor de inicio de sesión conservando el perfil y la propiedad de la biblioteca. No incluido en Slice 02. Antes de implementarlo, definir vinculación/desvinculación de cuentas, verificación de email y recuperación; no fusionar cuentas automáticamente solo por coincidencia de email.
 
 ## Backlog futuro — Finanzas y tercer tiempo (fuera del MVP)
 
@@ -86,4 +90,5 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 
 ## Implementación actual
 
-- **Slice 01:** endpoints de creación/listado/consulta de juegos, agregado de dominio de facciones, validación de cardinalidad, migración versionada y UI React. Ver [`slices/01-CATALOGO.md`](slices/01-CATALOGO.md). No se introduce identidad hasta el Slice 02.
+- **Slice 01:** catálogo y reglas conservados. Ver [`slices/01-CATALOGO.md`](slices/01-CATALOGO.md).
+- **Slice 02:** identidad mínima, perfil propio y autorización del catálogo. Ver [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). No incluye mazos ni invitados.

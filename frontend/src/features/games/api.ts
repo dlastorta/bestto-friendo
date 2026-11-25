@@ -1,3 +1,5 @@
+import { csrfHeaders } from '../identity/api'
+
 export type GameFaction = {
   id: string
   name: string
@@ -52,7 +54,7 @@ export async function listGames(): Promise<Game[]> {
 export async function createGame(payload: CreateGamePayload): Promise<Game> {
   return fromApi<Game>(await fetch('/api/games', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { ...await csrfHeaders(), Accept: 'application/json' },
     body: JSON.stringify(payload),
   }))
 }

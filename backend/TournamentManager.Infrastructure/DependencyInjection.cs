@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TournamentManager.Application.Abstractions;
@@ -6,6 +7,8 @@ using TournamentManager.Application.Features.Games;
 using TournamentManager.Infrastructure.Games;
 using TournamentManager.Infrastructure.Health;
 using TournamentManager.Infrastructure.Persistence;
+using TournamentManager.Application.Features.Identity;
+using TournamentManager.Infrastructure.Identity;
 
 namespace TournamentManager.Infrastructure;
 
@@ -25,6 +28,19 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<TournamentDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddIdentityCore<IdentityUser<Guid>>(options =>
+        {
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequiredLength = 12;
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        }).AddRoles<IdentityRole<Guid>>().AddEntityFrameworkStores<TournamentDbContext>().AddSignInManager();
+        services.AddScoped<IAccountAccess, AccountAccess>();
+        services.AddScoped<IPlayerProfiles, PlayerProfiles>();
         services.AddScoped<IDatabaseReadinessProbe, PostgresReadinessProbe>();
         services.AddScoped<IGameCatalog, EfGameCatalog>();
 

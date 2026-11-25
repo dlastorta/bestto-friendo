@@ -3,12 +3,14 @@ using TournamentManager.Application.Abstractions;
 namespace TournamentManager.Api.Features.System;
 
 public sealed record HealthResponse(string Status);
+public sealed record HealthEndpointMetadata;
 
 public static class SystemEndpoints
 {
     public static IEndpointRouteBuilder MapSystemEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var health = endpoints.MapGroup("/api/health").WithTags("System");
+        var health = endpoints.MapGroup("/api/health").WithTags("System")
+            .WithMetadata(new HealthEndpointMetadata()).AllowAnonymous();
 
         // Liveness: prueba que ASP.NET está ejecutándose; no requiere conexión a DB.
         health.MapGet("/live", () => TypedResults.Ok(new HealthResponse("healthy")))

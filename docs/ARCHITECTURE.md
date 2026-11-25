@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 01 (catálogo de juegos). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 02 (identidad mínima y autorización). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -61,8 +61,20 @@ No existe `IRepository<T>`, bus de mensajes ni abstracción de scoring/pairing t
 
 La migración `AddGamesCatalog` crea `games` y `game_factions`. El índice de nombre normalizado evita carreras de duplicación entre requests. El agregado valida cardinalidad y pertenencia de facciones, todavía no se asignan a mazos porque no existen hasta Slice 03.
 
-**Advertencia:** en este slice las escrituras del catálogo no requieren autenticación. La API es de uso local hasta incorporar autorización en Slice 02; no desplegar públicamente.
+**Evolución en Slice 02:** consultar juegos sigue siendo público; crearlos exige sesión, `CatalogAdmin` y CSRF. La versión sigue siendo local mientras se completan los flujos de cuenta y la configuración operativa de seguridad.
+
+## Implementación en Slice 02
+
+- `Domain/Players/Player`: perfil con identidad propia y cuenta asociada; valida el nombre visible sin conocer credenciales, HTTP o persistencia.
+- `Application/Features/Identity`: contratos `IAccountAccess`, `IPlayerProfiles`, `ICurrentAccount`, registro y consulta/edición del perfil autenticado. No se recibe un ID de dueño desde el cuerpo HTTP.
+- `Infrastructure/Identity`: ASP.NET Core Identity con `UserManager`/`SignInManager` para credenciales, normalización, hash y lockout. Cuenta y perfil se registran en una transacción. `TournamentDbContext` deriva de `IdentityDbContext`; toda la persistencia de Identity permanece aquí.
+- La migración `AddPlayerIdentity` agrega tablas de Identity, perfiles e índice único de email. Siembra solo el rol `CatalogAdmin`, sin usuarios ni credenciales. El operador lo asigna mediante `scripts/grant-catalog-admin.sql`.
+- `Api/Features/Identity`: cookies, CSRF y traducción de respuestas. `CurrentAccount` extrae la identidad de la sesión. La cookie se valida consultando existencia, bloqueo y permisos actuales de la cuenta en cada petición. `Program.cs` configura autenticación, política `ManageCatalog` y límite de intentos por IP.
+- React presenta registro/login/logout/perfil y oculta la creación de juegos sin permiso. El backend vuelve a autorizar cada escritura; ocultar controles no sustituye autorización.
+- No se almacenan credenciales ni tokens de sesión en localStorage. La cookie es HttpOnly y el token CSRF se obtiene antes de escribir, con `credentials: same-origin`.
+
+Ver contratos, límites de sesión, asignación del administrador y pruebas en [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). Google es mejora futura; no se introduce OAuth ni vinculación de cuentas ahora.
 
 ## Fuera de alcance de este slice
 
-Identidad, biblioteca de mazos, torneos, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Biblioteca de mazos, invitados, torneos, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.

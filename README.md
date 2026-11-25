@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 01: Catálogo de juegos
+## Estado — Slice 02: Identidad mínima de jugador
 
 Implementado en código:
 
@@ -13,7 +13,9 @@ Implementado en código:
 - Tests de reglas, endpoints desacoplados y prueba integrada contra PostgreSQL, habilitada en CI.
 - Bootstrap anterior: health checks, OpenAPI, Docker Compose, checks arquitectónicos y GitHub Actions.
 
-**Importante:** todavía **no hay autenticación**. El POST de juegos es una capacidad para desarrollo local; **no desplegar esta versión públicamente**. Los permisos de escritura se incorporarán con la identidad de jugador del Slice 02.
+El Slice 02 agrega registro por email/contraseña, sesión por cookie HttpOnly y perfil propio. Crear juegos requiere el rol `CatalogAdmin`; registrarse no concede ese rol. Las lecturas del catálogo siguen siendo públicas. Ver [contratos, asignación del administrador y límites de seguridad](docs/slices/02-IDENTIDAD.md).
+
+**No desplegar esta versión públicamente:** faltan verificación de email, recuperación de cuenta y preparación operativa de seguridad. El login con Google está registrado como mejora futura.
 
 Documentos: [`AGENTS.md`](AGENTS.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/TOURNAMENT_RULES.md`](docs/TOURNAMENT_RULES.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/slices/01-CATALOGO.md`](docs/slices/01-CATALOGO.md).
 
@@ -34,7 +36,7 @@ docker compose up -d postgres
 ```
 
 ```sh
-# Terminal 2: API (aplicar las dos migraciones antes de ejecutar)
+# Terminal 2: API (aplicar las migraciones antes de ejecutar)
 
 dotnet restore TournamentManager.slnx
 dotnet tool restore
@@ -52,15 +54,11 @@ npm run dev
 
 Abrir [http://localhost:5173](http://localhost:5173); la API escucha en `http://localhost:5080`. El proxy de Vite reenvía `/api` sin configuración CORS adicional.
 
-**La base no se crea automáticamente al arrancar**: aplicar migraciones explícitamente. El baseline crea la tabla de historial EF y `AddGamesCatalog` las tablas de juegos y facciones.
+**La base no se crea automáticamente al arrancar**: aplicar migraciones explícitamente. `AddGamesCatalog` crea juegos/facciones y `AddPlayerIdentity` agrega cuentas, perfiles y el rol de administrador, sin sembrar credenciales.
 
 ## Ejemplo de API
 
 ```sh
-curl -X POST http://localhost:5080/api/games \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"Magic: The Gathering","factions":["Blanco","Azul","Negro","Rojo","Verde"],"minimumFactions":1,"maximumFactions":5}'
-
 curl http://localhost:5080/api/games
 curl http://localhost:5080/api/health/live
 curl http://localhost:5080/api/health/ready
@@ -68,7 +66,7 @@ curl http://localhost:5080/api/health/ready
 
 | Ruta | Acción | Resultado |
 |---|---|---|
-| `POST /api/games` | Crea juego con facciones | `201` + `Location`; `400` inválido; `409` duplicado |
+| `POST /api/games` | Crea juego con facciones (administrador + CSRF) | `201` + `Location`; `400` inválido; `401` sin sesión; `403` sin permiso; `409` duplicado |
 | `GET /api/games` | Lista juegos + facciones | `200` |
 | `GET /api/games/{id}` | Consulta juego | `200` o `404` |
 | `GET /api/health/live` | Estado API | `200` |
@@ -112,11 +110,11 @@ RUN_POSTGRES_INTEGRATION=true dotnet test TournamentManager.slnx
 
 Si se configura otra base, definir `ConnectionStrings__TournamentDb` para la aplicación. No usar credenciales de Compose fuera de desarrollo.
 
-**Verificación pendiente en este entorno:** no se dispone de SDK de .NET, Docker ni paquetes npm instalados, por lo que no es posible afirmar que compilaron/ejecutaron tests, migración o UI. Se ejecutó únicamente la validación estática de estructura y convenciones. CI está preparado para realizar las comprobaciones en un entorno compatible.
+En este equipo, Windows Smart App Control bloquea la DLL de dominio en los tests nativos. El backend se verifica con Ubuntu 24.04 en WSL y PostgreSQL aislado; el frontend se verifica con Node en Windows. No es necesario desactivar Smart App Control.
 
 ## Siguiente slice
 
-**02 — Identidad mínima de jugador:** login, propietario de biblioteca y reglas de autorización. No se adelantó código de jugadores ni mazos en este slice.
+**03 — Biblioteca personal de mazos:** asociar mazos al dueño autenticado y probar que otra cuenta no puede editarlos. No se adelantó código de mazos en Slice 02.
 
 ### Política de seguridad de dependencias
 

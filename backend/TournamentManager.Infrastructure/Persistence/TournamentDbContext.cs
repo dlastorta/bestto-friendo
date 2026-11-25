@@ -1,15 +1,38 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TournamentManager.Domain.Games;
+using TournamentManager.Domain.Players;
 
 namespace TournamentManager.Infrastructure.Persistence;
 
 // Todo lo concerniente a EF se mantiene encapsulado en Infrastructure.
-public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> options) : DbContext(options)
+public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> options)
+    : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Game> Games => Set<Game>();
+    public DbSet<Player> Players => Set<Player>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IdentityRole<Guid>>().HasData(new IdentityRole<Guid>
+        {
+            Id = Guid.Parse("663147a8-7ec9-44dd-955c-ce06653cdf45"),
+            Name = "CatalogAdmin", NormalizedName = "CATALOGADMIN",
+            ConcurrencyStamp = "31a9e412-2e67-4420-bcb1-9cb2f84e11cc"
+        });
+        modelBuilder.Entity<IdentityUser<Guid>>().HasIndex(account => account.NormalizedEmail).IsUnique();
+        var player = modelBuilder.Entity<Player>();
+        player.ToTable("players");
+        player.HasKey(item => item.Id);
+        player.Property(item => item.Id).HasColumnName("id").ValueGeneratedNever();
+        player.Property(item => item.AccountId).HasColumnName("account_id");
+        player.Property(item => item.DisplayName).HasColumnName("display_name").HasMaxLength(80).IsRequired();
+        player.HasIndex(item => item.AccountId).IsUnique();
+        player.HasOne<IdentityUser<Guid>>().WithOne().HasForeignKey<Player>(item => item.AccountId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         var game = modelBuilder.Entity<Game>();
         game.ToTable("games");
         game.HasKey(item => item.Id);

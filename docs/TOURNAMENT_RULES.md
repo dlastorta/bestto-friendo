@@ -25,6 +25,15 @@ Estado: reglas acordadas y propuestas explícitamente distinguidas. Actualizadas
 
 **Restricción:** la biblioteca personal requiere una política de autenticación/autorización antes de permitir que varios usuarios administren sus propios mazos. Nunca exponer edición de mazos ajenos mediante IDs adivinables.
 
+### Decisiones del Slice 02 (2026-11-24)
+
+- Registro e inicio de sesión por email y contraseña, con sesión mediante cookie.
+- Solo un administrador del catálogo (`CatalogAdmin`) puede crear juegos; registrarse no concede ese permiso. Consultar el catálogo sigue siendo público.
+- Cada cuenta registrada tiene su propio perfil de jugador. Consultarlo o modificarlo usa la identidad de la sesión, nunca un identificador de dueño provisto por el cliente.
+- Política técnica inicial del perfil: nombre visible de 2 a 80 caracteres, sin exigir unicidad; el perfil tiene un identificador distinto de la cuenta.
+- Los invitados y su futura conciliación con cuentas siguen pendientes; no se les asignan credenciales ficticias.
+- La propiedad de mazos se implementará y verificará en Slice 03. El inicio de sesión con Google queda en el backlog futuro, sin decidir aún cómo vincular cuentas.
+
 ## 3. Juegos, facciones y metadatos
 
 - **Game** contiene las afiliaciones/facciones válidas (ejemplo: clanes en L5R y colores en Magic).

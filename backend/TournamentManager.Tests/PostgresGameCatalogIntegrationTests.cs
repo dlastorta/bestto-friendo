@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using TournamentManager.Application.Features.Games;
 using TournamentManager.Application.Features.Games.CreateGame;
 using Xunit;
@@ -19,8 +22,11 @@ public sealed class PostgresGameCatalogIntegrationTests
         if (Environment.GetEnvironmentVariable("RUN_POSTGRES_INTEGRATION") != "true")
             return;
 
-        using var factory = new WebApplicationFactory<Program>();
+        using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services => services.AddAuthentication("CatalogTest")
+                .AddScheme<AuthenticationSchemeOptions, CatalogAdminTestAuthentication>("CatalogTest", _ => { })));
         using var client = factory.CreateClient();
+        await IdentityTestSupport.SetCsrfAsync(client);
         var name = $"Integration-{Guid.NewGuid():N}";
         var command = new CreateGameCommand(name, ["Casa A", "Casa B"], 1, 2);
 

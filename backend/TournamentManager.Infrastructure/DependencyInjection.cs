@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IGameCatalog, EfGameCatalog>();
         services.AddScoped<IDeckLibrary, EfDeckLibrary>();
         services.AddScoped<ITournamentDrafts, EfTournamentDrafts>();
+        services.AddScoped<ITournamentRegistrations, EfTournamentRegistrations>();
 
         return services;
     }

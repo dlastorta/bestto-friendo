@@ -67,6 +67,10 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 
 **Regla confirmada:** al inscribirse, seleccionar un mazo de la biblioteca genera una copia histórica de su contenido y metadatos relevantes.
 
+**Privacidad confirmada para Slice 06 (2026-11-25):** solo el jugador puede ver su lista presentada. El organizador únicamente ve si presentó un mazo, sin acceso a su contenido. La autorización se aplica también en API; ocultar el contenido en la interfaz no es suficiente.
+
+**Inscripción confirmada para Slice 06 (2026-11-25):** acceso mediante enlace compartido por el organizador y cuenta autenticada. Se permite inscribirse sin mazo, pero debe presentarse antes del inicio del torneo. El inicio y la comprobación de este requisito se implementan en Slice 07. La primera presentación copia un mazo propio activo del juego compatible; no modifica la privacidad de la biblioteca.
+
 **Reglas propuestas para el MVP:**
 
 - Una inscripción utiliza **un solo mazo**; variantes multideck o cambios entre rondas requieren un slice posterior.

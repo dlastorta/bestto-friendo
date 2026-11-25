@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–04 integrados; Slice 05 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-25.
+Estado: Slices 01–05 integrados; Slice 06 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-25.
 
 ## Objetivo
 
@@ -88,7 +88,7 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 ## Decisiones aún pendientes
 
 - Facciones principales/secundarias, combinación de colores y sus restricciones por juego/formato.
-- Si la inscripción requiere mazo de manera obligatoria para todos los juegos/eventos.
+- La inscripción no requiere mazo inicialmente; debe presentarse antes del inicio (confirmado en Slice 06). Implementar la validación de inicio en Slice 07.
 - Qué actores pueden cambiar una presentación de mazo antes del inicio.
 - Qué campos de listas y estrategias son públicos, privados o visibles solo tras el cierre.
 - Cálculos exactos de Buchholz/OMW% y rondas no jugadas, límites y criterio final de desempate.
@@ -102,3 +102,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 03:** biblioteca privada por juego, edición con revisiones y archivo. Lista de cartas literal, sin controles. Ver [`slices/03-BIBLIOTECA.md`](slices/03-BIBLIOTECA.md). No incluye snapshots de torneo.
 - **Slice 04:** borradores privados para organizadores, con creación/listado/consulta por juego. Ver [`slices/04-TORNEOS.md`](slices/04-TORNEOS.md).
 - **Slice 05:** configuración explícita de puntos, byes y orden de desempates solo en borrador; todavía sin cálculos. Ver [`slices/05-REGLAS.md`](slices/05-REGLAS.md).
+- **Slice 06:** inscripción por enlace sin mazo inicial, presentación posterior de snapshot privado y estado visible al organizador. Ver [`slices/06-INSCRIPCIONES.md`](slices/06-INSCRIPCIONES.md).

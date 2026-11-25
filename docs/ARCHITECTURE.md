@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 05 (configuración de reglas). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 06 (inscripciones y snapshots). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -87,7 +87,16 @@ Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
 
 ## Fuera de alcance de este slice
 
-Inscripciones y snapshots, invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Inicio, sustitución auditada de presentaciones, invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+
+## Implementación en Slice 06
+
+- `TournamentRegistration` permite inscripción sin presentación; `TournamentDeckSnapshot` copia revisión y texto literal con facciones en una colección defensiva. La presentación valida dueño, juego, archivo, versión y estado de torneo.
+- `TournamentRegistrationsHandler` resuelve siempre el perfil desde sesión. Distingue DTO administrativo (jugador/estado) de presentación privada. El organizador no tiene un bypass al snapshot.
+- `ITournamentRegistrations` ofrece consultas específicas y commit; Infrastructure implementa EF. Cada inscripción/presentación modifica `ParticipationVersion` del torneo y se confirma junto con el registro/snapshot en una transacción. Un índice único evita inscripciones duplicadas.
+- El enlace aleatorio se habilita explícitamente y solo expone datos mínimos de invitación a una cuenta autenticada. No habilita endpoints administrativos. `RegistrationToken` tiene índice único y control de concurrencia.
+- React separa controles administrativos y «Mis inscripciones». La sesión determina sus claves de montaje; todas las escrituras usan CSRF.
+- Migración `AddTournamentRegistrations`, snapshots con FK restrictiva a revisión de origen. La lectura privada no reconstruye contenido desde el mazo vivo. Ver [contratos y pruebas](slices/06-INSCRIPCIONES.md).
 
 ## Implementación en Slice 05
 

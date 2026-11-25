@@ -3,6 +3,7 @@ import { listGames, type Game } from '../games/api'
 import { AuthenticationError } from '../identity/api'
 import { tournamentRequest, TournamentPermissionError, type Tournament } from './api'
 import { TournamentRulesEditor } from './TournamentRulesEditor'
+import { TournamentParticipants } from './Registrations'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -90,6 +91,7 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
           <dl><dt>Nombre</dt><dd>{selected.name}</dd><dt>Juego</dt><dd>{games.find(game => game.id === selected.gameId)?.name}</dd>
             <dt>Estado</dt><dd>{selected.status === 'Draft' ? 'Borrador' : selected.status}</dd><dt>Visibilidad</dt><dd>Privado</dd></dl>
           <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}`} tournament={selected} onSaved={setSelected} onAccessLost={onAccessLost} />
+          <TournamentParticipants key={selected.id} tournamentId={selected.id} onAccessLost={onAccessLost} />
         </article>}
       </div>
     </div>

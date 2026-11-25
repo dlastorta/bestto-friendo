@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using TournamentManager.Domain.Games;
 using TournamentManager.Domain.Players;
 using TournamentManager.Domain.Decks;
+using TournamentManager.Domain.Tournaments;
 
 namespace TournamentManager.Infrastructure.Persistence;
 
@@ -14,10 +15,26 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
     public DbSet<Game> Games => Set<Game>();
     public DbSet<Player> Players => Set<Player>();
     public DbSet<Deck> Decks => Set<Deck>();
+    public DbSet<Tournament> Tournaments => Set<Tournament>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var tournament = modelBuilder.Entity<Tournament>();
+        tournament.ToTable("tournaments");
+        tournament.HasKey(item => item.Id);
+        tournament.Property(item => item.Id).ValueGeneratedNever();
+        tournament.Property(item => item.Name).HasMaxLength(120).IsRequired();
+        tournament.Property(item => item.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
+        tournament.HasIndex(item => new { item.OrganizerPlayerId, item.GameId });
+        tournament.HasOne<Player>().WithMany().HasForeignKey(item => item.OrganizerPlayerId).OnDelete(DeleteBehavior.Restrict);
+        tournament.HasOne<Game>().WithMany().HasForeignKey(item => item.GameId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<IdentityRole<Guid>>().HasData(new IdentityRole<Guid>
+        {
+            Id = Guid.Parse("781621bb-bde8-442c-b945-d6767f49271a"),
+            Name = "TournamentOrganizer", NormalizedName = "TOURNAMENTORGANIZER",
+            ConcurrencyStamp = "dce35fe0-3322-40e2-8f26-1c37a3f901c6"
+        });
         var deck = modelBuilder.Entity<Deck>();
         deck.ToTable("decks");
         deck.HasKey(item => item.Id);

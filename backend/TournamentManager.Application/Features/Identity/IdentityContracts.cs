@@ -2,8 +2,8 @@ using TournamentManager.Domain.Players;
 
 namespace TournamentManager.Application.Features.Identity;
 
-public sealed record PlayerProfile(Guid Id, string DisplayName, bool CanManageCatalog);
-public sealed record AuthenticatedAccount(Guid Id, bool CanManageCatalog);
+public sealed record PlayerProfile(Guid Id, string DisplayName, bool CanManageCatalog, bool CanOrganizeTournaments = false);
+public sealed record AuthenticatedAccount(Guid Id, bool CanManageCatalog, bool CanOrganizeTournaments = false);
 public sealed record AccountResult(Guid? AccountId, IReadOnlyDictionary<string, string[]> Errors, bool Conflict = false)
 {
     public bool Succeeded => AccountId.HasValue;
@@ -20,6 +20,7 @@ public interface ICurrentAccount
 {
     Guid? AccountId { get; }
     bool CanManageCatalog { get; }
+    bool CanOrganizeTournaments { get; }
 }
 
 public interface IPlayerProfiles
@@ -54,7 +55,7 @@ public sealed class PlayerProfileHandler(ICurrentAccount currentAccount, IPlayer
     public async Task<PlayerProfile?> GetAsync(CancellationToken ct)
     {
         var player = await profiles.FindByAccountAsync(AccountId, ct);
-        return player is null ? null : new(player.Id, player.DisplayName, currentAccount.CanManageCatalog);
+        return player is null ? null : new(player.Id, player.DisplayName, currentAccount.CanManageCatalog, currentAccount.CanOrganizeTournaments);
     }
 
     public async Task<PlayerProfile?> RenameAsync(RenamePlayer command, CancellationToken ct)
@@ -63,6 +64,6 @@ public sealed class PlayerProfileHandler(ICurrentAccount currentAccount, IPlayer
         if (player is null) return null;
         player.Rename(command.DisplayName);
         await profiles.SaveAsync(player, ct);
-        return new(player.Id, player.DisplayName, currentAccount.CanManageCatalog);
+        return new(player.Id, player.DisplayName, currentAccount.CanManageCatalog, currentAccount.CanOrganizeTournaments);
     }
 }

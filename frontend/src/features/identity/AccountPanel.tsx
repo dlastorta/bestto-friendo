@@ -58,6 +58,7 @@ export function AccountPanel({ onChange }: { onChange: (profile: PlayerProfile |
   return <section className="account-section" aria-labelledby="account-heading">
     <h2 id="account-heading">{profile ? 'Mi perfil' : 'Tu cuenta de jugador'}</h2>
     <p>{profile ? (profile.canManageCatalog ? 'Administrador del catálogo' : 'Jugador') : 'Ingresá para acceder a tu perfil personal.'}</p>
+    {profile?.canOrganizeTournaments && <p>Organizador de torneos</p>}
     <form className="game-form" onSubmit={event => void submit(event)}>
       {(registering || profile) && <>
         <label htmlFor="player-name">Nombre del jugador</label>

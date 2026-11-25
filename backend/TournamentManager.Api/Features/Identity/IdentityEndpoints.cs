@@ -10,6 +10,7 @@ namespace TournamentManager.Api.Features.Identity;
 public sealed class CurrentAccount(IHttpContextAccessor accessor) : ICurrentAccount
 {
     public bool CanManageCatalog => accessor.HttpContext?.User.IsInRole("CatalogAdmin") == true;
+    public bool CanOrganizeTournaments => accessor.HttpContext?.User.IsInRole("TournamentOrganizer") == true;
     public Guid? AccountId => Guid.TryParse(accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id)
         ? id : null;
 }
@@ -62,6 +63,7 @@ public static class IdentityEndpoints
             if (account is null) return Results.Unauthorized();
             var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, account.Id.ToString()) };
             if (account.CanManageCatalog) claims.Add(new(ClaimTypes.Role, "CatalogAdmin"));
+            if (account.CanOrganizeTournaments) claims.Add(new(ClaimTypes.Role, "TournamentOrganizer"));
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme));
             await context.SignInAsync(IdentityConstants.ApplicationScheme, principal,
                 new AuthenticationProperties { IsPersistent = false });

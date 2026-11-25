@@ -34,6 +34,13 @@ Estado: reglas acordadas y propuestas explícitamente distinguidas. Actualizadas
 - Los invitados y su futura conciliación con cuentas siguen pendientes; no se les asignan credenciales ficticias.
 - La propiedad de mazos se implementará y verificará en Slice 03. El inicio de sesión con Google queda en el backlog futuro, sin decidir aún cómo vincular cuentas.
 
+### Decisiones del Slice 04 (2026-11-25)
+
+- Solo cuentas con rol `TournamentOrganizer` pueden crear y consultar torneos borrador; son privados del perfil creador. El rol no se concede al registrarse ni por administrar el catálogo.
+- El servidor deriva el organizador de la sesión y establece `Draft` al crear. Revocar el rol bloquea acceso con sesiones existentes sin borrar los torneos.
+- Cada torneo requiere un juego existente. Nombre de 2 a 120 caracteres, sin unicidad. El Slice 04 no implementa formatos avanzados, edición ni transiciones de estado.
+- No se agregan aún puntos, desempates, participantes ni snapshots; estas reglas permanecen en sus slices previstos.
+
 ## 3. Juegos, facciones y metadatos
 
 - **Game** contiene las afiliaciones/facciones válidas (ejemplo: clanes en L5R y colores en Magic).

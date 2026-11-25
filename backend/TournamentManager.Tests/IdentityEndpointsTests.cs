@@ -103,6 +103,7 @@ public sealed class IdentityEndpointsTests
     {
         private readonly Dictionary<string, Player> players = new(StringComparer.OrdinalIgnoreCase);
         public bool CatalogAdmin { get; set; }
+        public bool TournamentOrganizer { get; set; }
         public Task<AccountResult> RegisterAsync(string email, string password, Player player, CancellationToken ct)
         {
             if (!players.TryAdd(email, player))
@@ -111,10 +112,10 @@ public sealed class IdentityEndpointsTests
         }
         public Task<AuthenticatedAccount?> AuthenticateAsync(string email, string password, CancellationToken ct) =>
             Task.FromResult<AuthenticatedAccount?>(players.TryGetValue(email, out var player) && password == "a long password"
-                ? new(player.AccountId, CatalogAdmin) : null);
+                ? new(player.AccountId, CatalogAdmin, TournamentOrganizer) : null);
         public Task<AuthenticatedAccount?> FindAccountAsync(Guid accountId, CancellationToken ct) =>
             Task.FromResult<AuthenticatedAccount?>(players.Values.Any(player => player.AccountId == accountId)
-                ? new(accountId, CatalogAdmin) : null);
+                ? new(accountId, CatalogAdmin, TournamentOrganizer) : null);
         public Task<Player?> FindByAccountAsync(Guid accountId, CancellationToken ct) =>
             Task.FromResult(players.Values.SingleOrDefault(player => player.AccountId == accountId));
         public Task SaveAsync(Player player, CancellationToken ct) => Task.CompletedTask;

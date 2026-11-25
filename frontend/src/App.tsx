@@ -4,6 +4,7 @@ import { GamesCatalog } from './features/games/GamesCatalog'
 import { AccountPanel } from './features/identity/AccountPanel'
 import type { PlayerProfile } from './features/identity/api'
 import { DeckLibrary } from './features/decks/DeckLibrary'
+import { TournamentDrafts } from './features/tournaments/TournamentDrafts'
 
 type ServiceCardProps = {
   label: string
@@ -65,7 +66,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 03</span>
+        <span className="milestone">SLICE 04</span>
       </header>
 
       <main className="main-content">
@@ -102,14 +103,15 @@ function App() {
         </div>
 
         <AccountPanel key={sessionKey} onChange={setProfile} />
-        {profile && <DeckLibrary key={profile.id} onSessionExpired={expireSession} />}
+        {profile?.canOrganizeTournaments && <TournamentDrafts key={`tournaments-${profile.id}`} onAccessLost={expireSession} />}
+        {profile && <DeckLibrary key={`decks-${profile.id}`} onSessionExpired={expireSession} />}
         <GamesCatalog canCreate={profile?.canManageCatalog ?? false} />
 
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 04 · Crear torneos</h2>
-            <p>Torneos borrador asociados a un juego.</p>
+            <h2>Slice 05 · Reglas de torneo</h2>
+            <p>Configurar puntuación, byes y criterios de desempate.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

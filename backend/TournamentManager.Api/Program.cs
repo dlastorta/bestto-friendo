@@ -11,6 +11,8 @@ using TournamentManager.Api.Features.Identity;
 using TournamentManager.Application.Features.Identity;
 using TournamentManager.Application.Features.Decks;
 using TournamentManager.Api.Features.Decks;
+using TournamentManager.Api.Features.Tournaments;
+using TournamentManager.Application.Features.Tournaments;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,7 @@ builder.Services.AddScoped<ICurrentAccount, CurrentAccount>();
 builder.Services.AddScoped<RegisterAccountHandler>();
 builder.Services.AddScoped<PlayerProfileHandler>();
 builder.Services.AddScoped<DeckLibraryHandler>();
+builder.Services.AddScoped<TournamentDraftsHandler>();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
@@ -49,12 +52,16 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
             var identity = (ClaimsIdentity)context.Principal!.Identity!;
             foreach (var role in identity.FindAll(ClaimTypes.Role).ToArray()) identity.RemoveClaim(role);
             if (account.CanManageCatalog) identity.AddClaim(new Claim(ClaimTypes.Role, "CatalogAdmin"));
+            if (account.CanOrganizeTournaments) identity.AddClaim(new Claim(ClaimTypes.Role, "TournamentOrganizer"));
         };
         options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
         options.Events.OnRedirectToAccessDenied = context => { context.Response.StatusCode = 403; return Task.CompletedTask; };
     });
 builder.Services.AddAuthorization(options =>
-    options.AddPolicy("ManageCatalog", policy => policy.RequireAuthenticatedUser().RequireRole("CatalogAdmin")));
+{
+    options.AddPolicy("ManageCatalog", policy => policy.RequireAuthenticatedUser().RequireRole("CatalogAdmin"));
+    options.AddPolicy("OrganizeTournaments", policy => policy.RequireAuthenticatedUser().RequireRole("TournamentOrganizer"));
+});
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-CSRF-TOKEN";
@@ -89,6 +96,7 @@ app.MapIdentityEndpoints();
 app.MapSystemEndpoints();
 app.MapGameEndpoints();
 app.MapDeckEndpoints();
+app.MapTournamentEndpoints();
 
 app.Run();
 

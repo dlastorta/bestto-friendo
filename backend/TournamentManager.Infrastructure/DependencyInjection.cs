@@ -11,6 +11,8 @@ using TournamentManager.Application.Features.Identity;
 using TournamentManager.Infrastructure.Identity;
 using TournamentManager.Application.Features.Decks;
 using TournamentManager.Infrastructure.Decks;
+using TournamentManager.Application.Features.Tournaments;
+using TournamentManager.Infrastructure.Tournaments;
 
 namespace TournamentManager.Infrastructure;
 
@@ -46,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<IDatabaseReadinessProbe, PostgresReadinessProbe>();
         services.AddScoped<IGameCatalog, EfGameCatalog>();
         services.AddScoped<IDeckLibrary, EfDeckLibrary>();
+        services.AddScoped<ITournamentDrafts, EfTournamentDrafts>();
 
         return services;
     }

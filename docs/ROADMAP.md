@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01 y 02 integrados; Slice 03 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-25.
+Estado: Slices 01–03 integrados; Slice 04 implementado y verificado localmente, pendiente de revisión e integración. Actualizado el 2026-11-25.
 
 ## Objetivo
 
@@ -23,7 +23,7 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 | 01. Catálogo de juegos | Crear/listar juegos y definir sus afiliaciones/facciones y reglas de selección (una o varias). | No se puede asignar una facción de otro juego. |
 | 02. Identidad mínima de jugador | Cuenta por email/contraseña, sesión por cookie y perfil propio. | Registro/login/logout, aislamiento de perfiles y creación de juegos solo para administradores del catálogo. La propiedad de mazos se verificará en Slice 03; invitados y conciliación siguen pendientes. |
 | 03. Biblioteca personal de mazos | Crear, listar, consultar, editar y archivar mazos por juego. | Un jugador mantiene varios mazos; editar uno genera una nueva revisión lógica y no altera versiones utilizadas en torneos. |
-| 04. Crear torneos | Crear/listar/consultar torneos borrador, asociados a juego y eventualmente formato. | Torneo asociado a un juego válido. |
+| 04. Crear torneos | Crear/listar/consultar torneos borrador asociados a juego. | Juego válido; rol `TournamentOrganizer` obligatorio y borradores privados del creador. Formatos avanzados postergados. |
 | 05. Reglas de torneo | Configurar puntos por resultado, política de bye y secuencia ordenada de criterios de desempate. | Orden de desempate persistido; configuración editable solo en borrador. |
 | 06. Inscripciones y deck snapshot | Inscribir jugadores y seleccionar un mazo propio del juego compatible; almacenar copia del mazo presentado. | La inscripción referencia al mazo de origen **y** conserva un snapshot autónomo; modificaciones posteriores en biblioteca no lo actualizan. |
 | 07. Comenzar torneo | Validar condiciones de arranque; bloquear reglas y presentaciones de mazos. | No pueden modificarse reglas ni snapshots ya bloqueados. Las sustituciones previas se hacen mediante una acción explícita, auditada. |
@@ -55,6 +55,10 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 ## Mejora futura — Inicio de sesión con Google
 
 Solicitada el 2026-11-24. Incorporar Google como proveedor de inicio de sesión conservando el perfil y la propiedad de la biblioteca. No incluido en Slice 02. Antes de implementarlo, definir vinculación/desvinculación de cuentas, verificación de email y recuperación; no fusionar cuentas automáticamente solo por coincidencia de email.
+
+## Herramienta pendiente — Swagger UI
+
+Acordado el 2026-11-25: agregar Swagger UI al final, sin adelantarlo al Slice 04. El documento OpenAPI JSON sigue disponible solo en desarrollo en `/openapi/v1.json`.
 
 ## Backlog futuro — Finanzas y tercer tiempo (fuera del MVP)
 
@@ -96,3 +100,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 01:** catálogo y reglas conservados. Ver [`slices/01-CATALOGO.md`](slices/01-CATALOGO.md).
 - **Slice 02:** identidad mínima, perfil propio y autorización del catálogo. Ver [`slices/02-IDENTIDAD.md`](slices/02-IDENTIDAD.md). No incluye mazos ni invitados.
 - **Slice 03:** biblioteca privada por juego, edición con revisiones y archivo. Lista de cartas literal, sin controles. Ver [`slices/03-BIBLIOTECA.md`](slices/03-BIBLIOTECA.md). No incluye snapshots de torneo.
+- **Slice 04:** borradores privados para organizadores, con creación/listado/consulta por juego. Ver [`slices/04-TORNEOS.md`](slices/04-TORNEOS.md).

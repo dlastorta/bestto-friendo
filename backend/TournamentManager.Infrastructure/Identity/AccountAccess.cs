@@ -41,7 +41,8 @@ internal sealed class AccountAccess(
         var account = await users.FindByEmailAsync(email.Trim());
         if (account is null) return null;
         var result = await signIn.CheckPasswordSignInAsync(account, password, lockoutOnFailure: true);
-        return result.Succeeded ? new(account.Id, await users.IsInRoleAsync(account, "CatalogAdmin")) : null;
+        return result.Succeeded ? new(account.Id, await users.IsInRoleAsync(account, "CatalogAdmin"),
+            await users.IsInRoleAsync(account, "TournamentOrganizer")) : null;
     }
 
     public async Task<AuthenticatedAccount?> FindAccountAsync(Guid accountId, CancellationToken ct)
@@ -49,7 +50,8 @@ internal sealed class AccountAccess(
         ct.ThrowIfCancellationRequested();
         var account = await users.FindByIdAsync(accountId.ToString());
         if (account is null || await users.IsLockedOutAsync(account)) return null;
-        return new(account.Id, await users.IsInRoleAsync(account, "CatalogAdmin"));
+        return new(account.Id, await users.IsInRoleAsync(account, "CatalogAdmin"),
+            await users.IsInRoleAsync(account, "TournamentOrganizer"));
     }
 }
 

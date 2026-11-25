@@ -1,4 +1,4 @@
-export type PlayerProfile = { id: string; displayName: string; canManageCatalog: boolean }
+export type PlayerProfile = { id: string; displayName: string; canManageCatalog: boolean; canOrganizeTournaments: boolean }
 
 export class AuthenticationError extends Error {
   constructor() {

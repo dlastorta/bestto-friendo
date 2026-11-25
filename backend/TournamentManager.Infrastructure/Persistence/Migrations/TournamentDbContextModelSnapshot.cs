@@ -51,6 +51,13 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasData(
                         new
                         {
+                            Id = new Guid("781621bb-bde8-442c-b945-d6767f49271a"),
+                            ConcurrencyStamp = "dce35fe0-3322-40e2-8f26-1c37a3f901c6",
+                            Name = "TournamentOrganizer",
+                            NormalizedName = "TOURNAMENTORGANIZER"
+                        },
+                        new
+                        {
                             Id = new Guid("663147a8-7ec9-44dd-955c-ce06653cdf45"),
                             ConcurrencyStamp = "31a9e412-2e67-4420-bcb1-9cb2f84e11cc",
                             Name = "CatalogAdmin",
@@ -374,6 +381,36 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("players", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("OrganizerPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("OrganizerPlayerId", "GameId");
+
+                    b.ToTable("tournaments", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -463,6 +500,21 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<System.Guid>", null)
                         .WithOne()
                         .HasForeignKey("TournamentManager.Domain.Players.Player", "AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Games.Game", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizerPlayerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

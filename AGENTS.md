@@ -9,13 +9,13 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 03 — Biblioteca personal de mazos
+## Slice actual: 04 — Crear torneos en borrador
 
-**Permitido:** mantener catálogo e identidad; crear/listar/consultar/editar/archivar mazos propios por juego y conservar revisiones. Lista literal sin validaciones de cartas, cantidades ni formato; `N x Nombre de la carta` es una sugerencia. Ver `docs/slices/03-BIBLIOTECA.md`. Persistencia y EF solo en Infrastructure.
+**Permitido:** mantener catálogo, identidad y biblioteca; crear/listar/consultar torneos borrador de un juego válido, privados del creador y restringidos al rol `TournamentOrganizer`. Ver `docs/slices/04-TORNEOS.md`. No conceder el rol al registrarse ni por tener `CatalogAdmin`. Persistencia y EF solo en Infrastructure.
 
-**No permitido en Slice 03:** torneos y sus snapshots, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Login con Google es mejora futura.
+**No permitido en Slice 04:** reglas de puntuación/desempates, inscripciones y snapshots, inicio/publicación/edición/eliminación de torneos, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Google y Swagger UI quedan para después.
 
-**Seguridad temporal:** crear juegos requiere `CatalogAdmin`; perfil y biblioteca se determinan por la cuenta autenticada, sin privilegios administrativos sobre mazos ajenos. Escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
+**Seguridad temporal:** crear juegos requiere `CatalogAdmin`; torneos requieren `TournamentOrganizer`. Perfil, biblioteca y borradores se determinan por la cuenta autenticada, sin privilegios sobre datos ajenos. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
 ## Enfoque arquitectónico
 
@@ -75,14 +75,14 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 03
+## Definition of Done — Slice 04
 
-- Crear/listar/consultar/editar/archivar mazos propios desde API y React, con historial de revisiones inmutables.
-- Conservar texto de lista literal; validar juego y facciones sin parsear cartas.
-- Impedir lecturas/escrituras ajenas y pérdida de cambios concurrentes; cerrar la vista privada al terminar la sesión.
+- Crear/listar/consultar torneos borrador propios desde API y React, asociados a un juego válido.
+- Exigir `TournamentOrganizer`, separado de `CatalogAdmin`; no conceder roles por registro o cuerpo de la petición.
+- Impedir acceso ajeno y revalidar revocaciones con cookies existentes; cerrar la vista privada al perder sesión o permiso.
 - Separar perfil y credenciales; conservar todas las reglas del catálogo.
 - Conservar autorización del catálogo; validar CSRF y no aceptar un dueño del perfil o mazo enviado por el cliente.
-- Persistir mazos y revisiones mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
+- Persistir torneos mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
 - Tests puros, HTTP aislados, aislamiento entre cuentas e integración PostgreSQL real habilitable en CI.
-- Documentar contratos, conflictos de versión, archivo y limitaciones; conservar la documentación de cuentas y catálogo.
+- Documentar contratos, asignación del organizador y limitaciones; conservar las reglas de catálogo, identidad y biblioteca.
 - No declarar que tests/build/migración corrieron si no existe evidencia de ejecución.

@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 03 (biblioteca personal). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 04 (torneos borrador). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -87,4 +87,14 @@ Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
 
 ## Fuera de alcance de este slice
 
-Invitados, torneos y sus snapshots, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Inscripciones y snapshots, invitados, formatos avanzados, partidas, puntaje, desempates, byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+
+## Implementación en Slice 04
+
+- `Domain/Tournaments/Tournament`: creación de borradores con nombre y referencias válidas, sin HTTP, EF ni reglas anticipadas de torneo.
+- `Application/Features/Tournaments`: `TournamentDraftsHandler` verifica rol, resuelve perfil y juego; `ITournamentDrafts` ofrece Add/ListOwned/FindOwned sin tipos de persistencia.
+- `Infrastructure/Tournaments/EfTournamentDrafts`: filtros de propiedad en SQL y persistencia; migración `AddTournamentDrafts` con FK restrictivas y rol `TournamentOrganizer` sin cuentas/asignaciones.
+- API bajo `/api/tournaments`: política de organizador, CSRF, `404` para ajenos y errores de validación. Ambos roles se reconstruyen al validar cada cookie; no se confía en roles antiguos del ticket.
+- Perfil HTTP incorpora `canOrganizeTournaments`. React muestra creación/listado/detalle solo con ese permiso y elimina borradores visibles ante `401` o `403`, reconsultando la sesión. Los componentes privados tienen claves distintas por feature y jugador para desmontarlos correctamente.
+
+Ver [contratos, asignación administrativa y verificación](slices/04-TORNEOS.md).

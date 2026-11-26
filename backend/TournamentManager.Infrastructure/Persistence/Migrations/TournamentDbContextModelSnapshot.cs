@@ -397,6 +397,14 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OrganizerPlayerId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("ParticipationVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RegistrationToken")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.Property<int>("RulesVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
@@ -410,9 +418,74 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("GameId");
 
+                    b.HasIndex("RegistrationToken")
+                        .IsUnique();
+
                     b.HasIndex("OrganizerPlayerId", "GameId");
 
                     b.ToTable("tournaments", (string)null);
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", b =>
+                {
+                    b.Property<Guid>("RegistrationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ListText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<DateTimeOffset>("PresentedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SourceDeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SourceRevision")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<Guid[]>("_factionIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("faction_ids");
+
+                    b.HasKey("RegistrationId");
+
+                    b.HasIndex("SourceDeckId", "SourceRevision");
+
+                    b.ToTable("tournament_deck_snapshots", (string)null);
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("RegisteredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TournamentId", "PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("tournament_registrations", (string)null);
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRules", b =>
@@ -557,6 +630,36 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Tournaments.TournamentRegistration", null)
+                        .WithOne("Snapshot")
+                        .HasForeignKey("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", "RegistrationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Decks.DeckRevision", null)
+                        .WithMany()
+                        .HasForeignKey("SourceDeckId", "SourceRevision")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRules", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
@@ -579,6 +682,11 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.Navigation("Rules");
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>
+                {
+                    b.Navigation("Snapshot");
                 });
 #pragma warning restore 612, 618
         }

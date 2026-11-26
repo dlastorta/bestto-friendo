@@ -9,13 +9,13 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 05 — Configuración de reglas de torneo
+## Slice actual: 06 — Inscripciones y snapshot de mazos
 
-**Permitido:** mantener slices anteriores y configurar puntos por resultado, habilitación/puntaje de bye y orden de desempates en torneos propios en borrador, con `TournamentOrganizer`. Ver `docs/slices/05-REGLAS.md`. Torneos sin configuración inicial; máximo un bye por participante fijo; fórmulas de desempate todavía pendientes. Persistencia y EF solo en Infrastructure.
+**Permitido:** mantener slices anteriores, habilitar enlace de inscripción desde el organizador propietario, inscribirse con cuenta autenticada sin mazo inicial y presentar luego un mazo propio activo del juego compatible. Guardar snapshot autónomo privado. Solo el jugador ve su lista; el organizador únicamente ve si presentó mazo. Ver `docs/slices/06-INSCRIPCIONES.md`. Persistencia y EF solo en Infrastructure.
 
-**No permitido en Slice 05:** ejecutar cálculos de clasificación/desempates, asignar byes, inscripciones y snapshots, inicio/publicación/eliminación de torneos, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Google y Swagger UI quedan para después.
+**No permitido en Slice 06:** inicio/publicación/eliminación de torneos, reemplazo de presentaciones sin auditoría, cálculos de clasificación/desempates, asignación de byes, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Google y Swagger UI quedan para después. El mazo es obligatorio antes del inicio; esa validación se implementa con el caso de uso de Slice 07.
 
-**Seguridad temporal:** crear juegos requiere `CatalogAdmin`; torneos requieren `TournamentOrganizer`. Perfil, biblioteca y borradores se determinan por la cuenta autenticada, sin privilegios sobre datos ajenos. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
+**Seguridad temporal:** crear juegos requiere `CatalogAdmin`; administrar torneos requiere `TournamentOrganizer`. Inscripción por enlace y presentación propia requieren sesión, sin rol administrativo. Perfil, biblioteca, inscripciones y snapshots se determinan por la cuenta autenticada, sin privilegios sobre listas ajenas. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
 ## Enfoque arquitectónico
 
@@ -75,15 +75,16 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 05
+## Definition of Done — Slice 06
 
-- Configurar y consultar puntuación, política de bye y secuencia ordenada de desempates desde API y React, solo en borrador.
-- No imponer puntajes por defecto ni resolver fórmulas pendientes. Evitar cambios perdidos mediante versión y transacción.
-- Exigir `TournamentOrganizer`, separado de `CatalogAdmin`; no conceder roles por registro o cuerpo de la petición.
+- Inscripción por enlace y cuenta autenticada, sin mazo inicial obligatorio, desde API y React.
+- Presentación posterior de mazo propio compatible y snapshot independiente; editar/archivar origen no altera su contenido.
+- Organizador solo consulta estado de presentación; contenido y referencias del mazo visibles únicamente al jugador.
+- Exigir `TournamentOrganizer` para administrar el torneo, separado de `CatalogAdmin`; no conceder roles por registro o cuerpo de la petición.
 - Impedir acceso ajeno y revalidar revocaciones con cookies existentes; cerrar la vista privada al perder sesión o permiso.
 - Separar perfil y credenciales; conservar todas las reglas del catálogo.
 - Conservar autorización del catálogo; validar CSRF y no aceptar un dueño del perfil o mazo enviado por el cliente.
-- Persistir reglas mediante migraciones EF versionadas, sin EF en Domain, Application ni endpoints.
+- Persistir inscripciones y snapshots mediante migraciones EF versionadas y escrituras transaccionales; prevenir duplicados concurrentes, sin EF en Domain, Application ni endpoints.
 - Tests puros, HTTP aislados, aislamiento entre cuentas e integración PostgreSQL real habilitable en CI.
 - Documentar contratos, asignación del organizador y limitaciones; conservar las reglas de catálogo, identidad y biblioteca.
 - No declarar que tests/build/migración corrieron si no existe evidencia de ejecución.

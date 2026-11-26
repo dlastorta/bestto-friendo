@@ -5,6 +5,7 @@ import { AccountPanel } from './features/identity/AccountPanel'
 import type { PlayerProfile } from './features/identity/api'
 import { DeckLibrary } from './features/decks/DeckLibrary'
 import { TournamentDrafts } from './features/tournaments/TournamentDrafts'
+import { Registrations } from './features/tournaments/Registrations'
 
 type ServiceCardProps = {
   label: string
@@ -66,7 +67,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 05</span>
+        <span className="milestone">SLICE 06</span>
       </header>
 
       <main className="main-content">
@@ -105,13 +106,14 @@ function App() {
         <AccountPanel key={sessionKey} onChange={setProfile} />
         {profile?.canOrganizeTournaments && <TournamentDrafts key={`tournaments-${profile.id}`} onAccessLost={expireSession} />}
         {profile && <DeckLibrary key={`decks-${profile.id}`} onSessionExpired={expireSession} />}
+        {profile && <Registrations key={`registrations-${profile.id}`} onSessionExpired={expireSession} />}
         <GamesCatalog canCreate={profile?.canManageCatalog ?? false} />
 
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 06 · Inscripciones y mazos</h2>
-            <p>Inscribir jugadores y conservar el mazo presentado.</p>
+            <h2>Slice 07 · Comenzar torneo</h2>
+            <p>Validar presentaciones y congelar la configuración al iniciar.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

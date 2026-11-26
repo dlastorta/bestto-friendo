@@ -16,6 +16,7 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
     public DbSet<Player> Players => Set<Player>();
     public DbSet<Deck> Decks => Set<Deck>();
     public DbSet<Tournament> Tournaments => Set<Tournament>();
+    public DbSet<TournamentRegistration> Registrations => Set<TournamentRegistration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,6 +28,26 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         tournament.Property(item => item.Name).HasMaxLength(120).IsRequired();
         tournament.Property(item => item.Status).HasConversion<string>().HasMaxLength(30).IsRequired();
         tournament.Property(item => item.RulesVersion).IsConcurrencyToken();
+        tournament.Property(item => item.ParticipationVersion).IsConcurrencyToken();
+        tournament.Property(item => item.RegistrationToken).IsConcurrencyToken();
+        tournament.HasIndex(item => item.RegistrationToken).IsUnique();
+        var registration = modelBuilder.Entity<TournamentRegistration>();
+        registration.ToTable("tournament_registrations");
+        registration.HasKey(r => r.Id);
+        registration.Property(r => r.Id).ValueGeneratedNever();
+        registration.HasIndex(r => new { r.TournamentId, r.PlayerId }).IsUnique();
+        registration.HasOne<Tournament>().WithMany().HasForeignKey(r => r.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        registration.HasOne<Player>().WithMany().HasForeignKey(r => r.PlayerId).OnDelete(DeleteBehavior.Restrict);
+        registration.HasOne(r => r.Snapshot).WithOne().HasForeignKey<TournamentDeckSnapshot>(s => s.RegistrationId).OnDelete(DeleteBehavior.Restrict);
+        var snapshot = modelBuilder.Entity<TournamentDeckSnapshot>();
+        snapshot.ToTable("tournament_deck_snapshots");
+        snapshot.HasKey(s => s.RegistrationId);
+        snapshot.Property(s => s.RegistrationId).ValueGeneratedNever();
+        snapshot.Property(s => s.Name).HasMaxLength(120).IsRequired();
+        snapshot.Property(s => s.ListText).IsRequired();
+        snapshot.Ignore(s => s.FactionIds);
+        snapshot.Property<Guid[]>("_factionIds").HasColumnName("faction_ids").HasColumnType("uuid[]").IsRequired();
+        snapshot.HasOne<DeckRevision>().WithMany().HasForeignKey(s => new { s.SourceDeckId, s.SourceRevision }).OnDelete(DeleteBehavior.Restrict);
         tournament.HasOne(item => item.Rules).WithOne().HasForeignKey<TournamentRules>(item => item.TournamentId).OnDelete(DeleteBehavior.Cascade);
         var rules = modelBuilder.Entity<TournamentRules>();
         rules.ToTable("tournament_rules");

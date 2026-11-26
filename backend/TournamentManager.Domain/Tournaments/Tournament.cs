@@ -11,6 +11,27 @@ public sealed class Tournament
     public TournamentStatus Status { get; private set; }
     public int RulesVersion { get; private set; }
     public TournamentRules? Rules { get; private set; }
+    public Guid? RegistrationToken { get; private set; }
+    public int ParticipationVersion { get; private set; }
+
+    public Guid EnableRegistrationLink()
+    {
+        EnsureDraft();
+        RegistrationToken ??= Guid.NewGuid();
+        return RegistrationToken.Value;
+    }
+
+    public void RecordParticipationChange()
+    {
+        EnsureDraft();
+        ParticipationVersion++;
+    }
+
+    private void EnsureDraft()
+    {
+        if (Status != TournamentStatus.Draft)
+            throw new TournamentConflictException("Las inscripciones y presentaciones solo están disponibles antes del inicio.");
+    }
 
     public void ConfigureRules(decimal win, decimal draw, decimal loss, bool byesEnabled, decimal bye,
         IEnumerable<string>? tieBreakers, int expectedVersion)

@@ -5,7 +5,9 @@ using TournamentManager.Domain.Tournaments;
 namespace TournamentManager.Application.Features.Tournaments;
 
 public sealed record CreateTournamentDraft(string? Name, Guid GameId);
-public sealed record TournamentDto(Guid Id, string Name, Guid GameId, string Status, int RulesVersion = 0, TournamentRulesDto? Rules = null);
+public sealed record TournamentDto(Guid Id, string Name, Guid GameId, string Status, int RulesVersion = 0, TournamentRulesDto? Rules = null,
+    int ParticipationVersion = 0, DateTimeOffset? StartedAt = null, TournamentRulesDto? StartedRules = null);
+public sealed record StartTournament(int? ExpectedRulesVersion, int? ExpectedParticipationVersion);
 public sealed record TournamentRulesDto(decimal WinPoints, decimal DrawPoints, decimal LossPoints,
     bool ByesEnabled, decimal ByePoints, int MaximumByesPerParticipant, IReadOnlyList<string> TieBreakers);
 public sealed record ConfigureTournamentRules(decimal? WinPoints, decimal? DrawPoints, decimal? LossPoints,
@@ -69,5 +71,8 @@ public sealed class TournamentDraftsHandler(ICurrentAccount current, IPlayerProf
     private static TournamentDto ToDto(Tournament tournament) =>
         new(tournament.Id, tournament.Name, tournament.GameId, tournament.Status.ToString(), tournament.RulesVersion,
             tournament.Rules is { } rules ? new(rules.WinPoints, rules.DrawPoints, rules.LossPoints,
-                rules.ByesEnabled, rules.ByePoints, TournamentRules.MaximumByesPerParticipant, rules.TieBreakers.ToArray()) : null);
+                rules.ByesEnabled, rules.ByePoints, TournamentRules.MaximumByesPerParticipant, rules.TieBreakers.ToArray()) : null,
+            tournament.ParticipationVersion, tournament.StartedAt, tournament.StartedRules is { } frozen
+                ? new(frozen.WinPoints, frozen.DrawPoints, frozen.LossPoints, frozen.ByesEnabled, frozen.ByePoints,
+                    frozen.MaximumByesPerParticipant, frozen.TieBreakers.ToArray()) : null);
 }

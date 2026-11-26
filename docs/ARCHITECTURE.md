@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 06 (inscripciones y snapshots). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 07 (inicio y conservación histórica de reglas). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -87,7 +87,15 @@ Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
 
 ## Fuera de alcance de este slice
 
-Inicio, sustitución auditada de presentaciones, invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+
+## Implementación en Slice 07
+
+- `Tournament.Start` valida reglas, mínimo de dos participantes y todas las presentaciones; captura `FrozenTournamentRules`, fecha y estado `InProgress`. Puntos, política de bye (incluido máximo) y secuencia de desempates se copian por valor en `tournament_started_rules`, con versión de origen. Las lecturas posteriores y futuros cálculos deben usar `StartedRules`.
+- El handler autoriza al organizador propietario y obtiene conteos por puertos. Infrastructure confirma inicio y reglas históricas en un único `SaveChangesAsync`; `Status`, `RulesVersion` y `ParticipationVersion` son tokens de concurrencia. Una inscripción, reemplazo o modificación de reglas concurrente invalida la otra operación sin commits parciales.
+- La inscripción conserva una colección de snapshots inmutables, identificados por inscripción y número; la presentación vigente es la última. Reemplazar agrega una fila con actor, fecha y motivo, nunca actualiza la anterior. Historial y contenido siguen siendo exclusivos del jugador.
+- `AddTournamentStartAndSubmissionHistory` preserva las presentaciones previas como versión 1. Su downgrade rechaza perder reglas históricas o reemplazos; ver instrucciones operativas en [Slice 07](slices/07-INICIO.md).
+- React confirma el inicio con las versiones observadas, muestra reglas históricas y bloquea edición después del inicio. El backend vuelve a validar cada operación. No se versionan fórmulas aún inexistentes: cuando se incorporen, su evolución deberá preservar la semántica de torneos históricos.
 
 ## Implementación en Slice 06
 

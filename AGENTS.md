@@ -9,11 +9,11 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 06 — Inscripciones y snapshot de mazos
+## Slice actual: 07 — Comenzar torneo
 
-**Permitido:** mantener slices anteriores, habilitar enlace de inscripción desde el organizador propietario, inscribirse con cuenta autenticada sin mazo inicial y presentar luego un mazo propio activo del juego compatible. Guardar snapshot autónomo privado. Solo el jugador ve su lista; el organizador únicamente ve si presentó mazo. Ver `docs/slices/06-INSCRIPCIONES.md`. Persistencia y EF solo en Infrastructure.
+**Permitido:** mantener slices anteriores, iniciar desde el organizador propietario con reglas configuradas, al menos dos jugadores y todos los mazos presentados. Conservar copia histórica independiente de las reglas al inicio. Solo el jugador puede reemplazar su presentación antes del inicio, con motivo e historial privado. Solo el jugador ve su lista; el organizador únicamente ve si presentó mazo. Ver `docs/slices/07-INICIO.md`. Persistencia y EF solo en Infrastructure.
 
-**No permitido en Slice 06:** inicio/publicación/eliminación de torneos, reemplazo de presentaciones sin auditoría, cálculos de clasificación/desempates, asignación de byes, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Google y Swagger UI quedan para después. El mazo es obligatorio antes del inicio; esa validación se implementa con el caso de uso de Slice 07.
+**No permitido en Slice 07:** publicación/eliminación de torneos, vuelta a borrador, cambios de reglas o presentaciones después del inicio, reemplazos sin auditoría, cálculos de clasificación/desempates, asignación de byes, formatos avanzados, resultados, algoritmos suizos, Elo, edición/eliminación de juegos, legalidad/importación de cartas ni conciliación de invitados. Google y Swagger UI quedan para después.
 
 **Seguridad temporal:** crear juegos requiere `CatalogAdmin`; administrar torneos requiere `TournamentOrganizer`. Inscripción por enlace y presentación propia requieren sesión, sin rol administrativo. Perfil, biblioteca, inscripciones y snapshots se determinan por la cuenta autenticada, sin privilegios sobre listas ajenas. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
@@ -50,9 +50,9 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 5. Actualizar README, arquitectura y reglas cuando cambien decisiones.
 6. Documentar bloqueos o verificaciones pendientes con instrucciones reproducibles.
 
-## Invariantes para slices futuros (no implementar ahora)
+## Invariantes que deben preservar los slices futuros
 
-- Puntaje de victoria/empate/derrota/bye configurable, congelado al inicio.
+- Puntaje de victoria/empate/derrota/bye configurable, congelado al inicio en `StartedRules`. Los futuros cálculos usan esa copia, nunca configuración viva. Cambios futuros de fórmulas deberán preservar la semántica histórica mediante versionado explícito.
 - Criterios de desempate ordenados y aplicados secuencialmente.
 - Máximo un bye por participante y torneo.
 - Biblioteca personal de mazos separada del `DeckSubmission` / snapshot histórico inmutable en el torneo.
@@ -75,7 +75,13 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 06
+## Definition of Done — Slice 07
+
+- Inicio exclusivo del organizador propietario, con confirmación en React, reglas explícitas, al menos dos jugadores y todas las presentaciones completas.
+- Persistir fecha de inicio y copia autónoma de puntos, política de bye y orden de desempates; impedir segundo inicio y modificaciones posteriores.
+- Reemplazo exclusivo del jugador antes del inicio, con motivo, actor, fecha y todas las versiones anteriores; historial privado.
+- Inicio atómico frente a cambios concurrentes de reglas, inscripciones y presentaciones; probar ambas órdenes de commit con PostgreSQL real.
+- Migración que preserve snapshots existentes; conservar las garantías del Slice 06 siguientes.
 
 - Inscripción por enlace y cuenta autenticada, sin mazo inicial obligatorio, desde API y React.
 - Presentación posterior de mazo propio compatible y snapshot independiente; editar/archivar origen no altera su contenido.

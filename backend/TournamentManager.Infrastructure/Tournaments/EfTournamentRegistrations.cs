@@ -13,15 +13,15 @@ internal sealed class EfTournamentRegistrations(TournamentDbContext db) : ITourn
     public Task<Tournament?> FindForPlayerAsync(Guid tournamentId, Guid playerId, CancellationToken ct) =>
         db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId && db.Registrations.Any(r => r.TournamentId == t.Id && r.PlayerId == playerId), ct);
     public Task<TournamentRegistration?> FindAsync(Guid tournamentId, Guid playerId, CancellationToken ct) =>
-        db.Registrations.Include(r => r.Snapshot).SingleOrDefaultAsync(r => r.TournamentId == tournamentId && r.PlayerId == playerId, ct);
+        db.Registrations.Include(r => r.Snapshots).SingleOrDefaultAsync(r => r.TournamentId == tournamentId && r.PlayerId == playerId, ct);
     public async Task<IReadOnlyList<MyRegistration>> ListMineAsync(Guid playerId, CancellationToken ct) =>
         await (from r in db.Registrations.AsNoTracking() join t in db.Tournaments on r.TournamentId equals t.Id
                where r.PlayerId == playerId orderby t.Name, t.Id
-               select new MyRegistration(t.Id, t.Name, t.GameId, r.Snapshot != null)).ToListAsync(ct);
+               select new MyRegistration(t.Id, t.Name, t.GameId, r.Snapshots.Any(), t.Status.ToString())).ToListAsync(ct);
     public async Task<IReadOnlyList<ParticipantStatus>> ListParticipantsAsync(Guid tournamentId, CancellationToken ct) =>
         await (from r in db.Registrations.AsNoTracking() join p in db.Players on r.PlayerId equals p.Id
                where r.TournamentId == tournamentId orderby p.DisplayName, p.Id
-               select new ParticipantStatus(p.Id, p.DisplayName, r.Snapshot != null)).ToListAsync(ct);
+               select new ParticipantStatus(p.Id, p.DisplayName, r.Snapshots.Any())).ToListAsync(ct);
     public async Task AddAsync(TournamentRegistration registration, CancellationToken ct)
     {
         db.Registrations.Add(registration);

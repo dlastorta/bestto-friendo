@@ -17,10 +17,30 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
     public DbSet<Deck> Decks => Set<Deck>();
     public DbSet<Tournament> Tournaments => Set<Tournament>();
     public DbSet<TournamentRegistration> Registrations => Set<TournamentRegistration>();
+    public DbSet<TournamentMatch> Matches => Set<TournamentMatch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var match = modelBuilder.Entity<TournamentMatch>();
+        match.ToTable("tournament_matches");
+        match.HasKey(m => m.Id);
+        match.Property(m => m.Id).ValueGeneratedNever();
+        match.Property(m => m.Version).IsConcurrencyToken();
+        match.HasIndex(m => new { m.TournamentId, m.Round });
+        match.HasOne<Tournament>().WithMany().HasForeignKey(m => m.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        match.HasOne<Player>().WithMany().HasForeignKey(m => m.PlayerOneId).OnDelete(DeleteBehavior.Restrict);
+        match.HasOne<Player>().WithMany().HasForeignKey(m => m.PlayerTwoId).OnDelete(DeleteBehavior.Restrict);
+        match.Ignore(m => m.CurrentResult);
+        match.HasMany(m => m.Results).WithOne().HasForeignKey(r => r.MatchId).OnDelete(DeleteBehavior.Restrict);
+        match.Navigation(m => m.Results).HasField("_results").UsePropertyAccessMode(PropertyAccessMode.Field);
+        var result = modelBuilder.Entity<MatchResultRevision>();
+        result.ToTable("match_result_revisions");
+        result.HasKey(r => new { r.MatchId, r.Number });
+        result.Property(r => r.Number).ValueGeneratedNever();
+        result.Property(r => r.Outcome).HasMaxLength(30).IsRequired();
+        result.Property(r => r.Kind).HasMaxLength(30).IsRequired();
+        result.Property(r => r.Reason).HasMaxLength(500).IsRequired();
         var tournament = modelBuilder.Entity<Tournament>();
         tournament.ToTable("tournaments");
         tournament.HasKey(item => item.Id);
@@ -39,6 +59,7 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         frozen.Ignore(r => r.TieBreakers);
         frozen.Property<string[]>("_tieBreakers").HasColumnName("tie_breakers").HasColumnType("text[]").IsRequired();
         tournament.Property(item => item.RulesVersion).IsConcurrencyToken();
+        tournament.Property(item => item.MatchesVersion).IsConcurrencyToken();
         tournament.Property(item => item.ParticipationVersion).IsConcurrencyToken();
         tournament.Property(item => item.RegistrationToken).IsConcurrencyToken();
         tournament.HasIndex(item => item.RegistrationToken).IsUnique();

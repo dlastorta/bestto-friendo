@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 07 (inicio y conservación histórica de reglas). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 08 (partidas manuales y resultados). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -87,7 +87,16 @@ Ver [contratos y verificación](slices/03-BIBLIOTECA.md).
 
 ## Fuera de alcance de este slice
 
-Invitados, formatos avanzados, partidas, cálculo de puntaje/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+Invitados, formatos avanzados, clasificación/desempates, asignación de byes, estadísticas, publicación y Elo. Ver `docs/ROADMAP.md`. La edición de juegos existentes requiere definir una política de impacto sobre referencias históricas y queda postergada.
+
+## Implementación en Slice 08
+
+- `TournamentMatch` valida estado, jugadores distintos y ocupación de ronda. Sus resultados son revisiones inmutables (`MatchResultRevision`) con tipo, resultado, motivo, actor y fecha; `CurrentResult` selecciona la última. Los puntos se calculan con `FrozenTournamentRules`, nunca con la configuración fuente.
+- `TournamentMatchesHandler` verifica sesión, rol y propiedad antes de consultar partidas; puertos existentes para torneo/inscripciones y `ITournamentMatches` específico para persistencia. Ninguna entrada permite elegir actor ni puntos.
+- Infrastructure confirma creación y `Tournament.MatchesVersion` en una transacción. Ese token serializa creaciones del torneo y evita que lecturas simultáneas acepten el mismo jugador en una ronda, incluso si cambia de lado. Todo futuro flujo de creación (incluido suizo) debe respetar esta protección; no basta consultar antes de insertar.
+- Corrección: `TournamentMatch.Version` y clave `(MatchId, Number)` protegen la concurrencia. Conflicto de actualización o revisión duplicada devuelve `409`, con rollback completo. EF y SQL permanecen en Infrastructure.
+- Migración `AddManualMatches`: tablas `tournament_matches` / `match_result_revisions` y token `MatchesVersion`. No transforma reglas ni snapshots. El downgrade bloquea pérdida de partidas existentes.
+- React incorpora partidas en detalle de torneo en curso, selección de jugadores, resultado, corrección e historial. Ante 401/403 desmonta la vista privada; ante 409 conserva el formulario para recargar explícitamente. Ver [contratos y verificación](slices/08-PARTIDAS.md).
 
 ## Implementación en Slice 07
 

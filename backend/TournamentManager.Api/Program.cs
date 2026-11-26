@@ -24,6 +24,7 @@ builder.Services.AddScoped<PlayerProfileHandler>();
 builder.Services.AddScoped<DeckLibraryHandler>();
 builder.Services.AddScoped<TournamentDraftsHandler>();
 builder.Services.AddScoped<TournamentRegistrationsHandler>();
+builder.Services.AddScoped<TournamentMatchesHandler>();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
@@ -99,6 +100,7 @@ app.MapGameEndpoints();
 app.MapDeckEndpoints();
 app.MapTournamentEndpoints();
 app.MapRegistrationEndpoints();
+app.MapMatchEndpoints();
 
 app.Run();
 

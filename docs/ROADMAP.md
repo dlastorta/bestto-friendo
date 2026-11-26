@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–06 integrados; Slice 07 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-26.
+Estado: Slices 01–07 integrados; Slice 08 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-26.
 
 ## Objetivo
 
@@ -27,7 +27,7 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 | 05. Reglas de torneo | Configurar puntos por resultado, política de bye y secuencia ordenada de criterios de desempate. | Orden de desempate persistido; configuración editable solo en borrador. |
 | 06. Inscripciones y deck snapshot | Inscribir jugadores y seleccionar un mazo propio del juego compatible; almacenar copia del mazo presentado. | La inscripción referencia al mazo de origen **y** conserva un snapshot autónomo; modificaciones posteriores en biblioteca no lo actualizan. |
 | 07. Comenzar torneo | Validar arranque y conservar reglas históricas independientes; bloquear inscripciones y presentaciones. | Organizador propietario, reglas configuradas, mínimo dos jugadores y todos los mazos presentados. Solo el jugador puede sustituir su presentación antes del inicio, con motivo e historial privado. |
-| 08. Partidas manuales y resultados | Crear enfrentamientos manuales, cargar/corregir resultados y registrar el motivo (jugado, forfeit, etc.). | Puntos derivados de las reglas; correcciones recalculan clasificaciones. |
+| 08. Partidas manuales y resultados | Crear enfrentamientos manuales, cargar/corregir resultados y registrar el motivo (jugado, forfeit, etc.). | Puntos de cada partida derivados de reglas históricas y recalculados al corregir, con historial. La clasificación agregada del Slice 09 debe reconstruirse desde resultados vigentes. |
 | 09. Tabla básica | Mostrar clasificación por puntos. | Se reconstruye desde resultados y reglas; no usa un total mutable como fuente de verdad. |
 | 10. Cadena de desempates | Configurar y calcular secuencialmente Buchholz, OMW%, Buchholz con descarte, según definiciones concretas. | Si persiste igualdad se evalúa el criterio siguiente, sin reordenar arbitrariamente. Implementar políticas de rondas no jugadas antes de aceptar resultados oficiales. |
 | 11. Byes | Soportar asignación y resultados de bye según política. | Máximo un bye por jugador en el torneo; bye distinguible de partidas jugadas y forfeit. |
@@ -102,3 +102,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 05:** configuración explícita de puntos, byes y orden de desempates solo en borrador; todavía sin cálculos. Ver [`slices/05-REGLAS.md`](slices/05-REGLAS.md).
 - **Slice 06:** inscripción por enlace sin mazo inicial, presentación posterior de snapshot privado y estado visible al organizador. Ver [`slices/06-INSCRIPCIONES.md`](slices/06-INSCRIPCIONES.md).
 - **Slice 07:** inicio, reglas históricas autónomas y sustitución auditada privada antes del inicio. Ver [`slices/07-INICIO.md`](slices/07-INICIO.md).
+- **Slice 08:** partidas manuales por ronda, resultados y correcciones auditadas con puntos históricos. Ver [`slices/08-PARTIDAS.md`](slices/08-PARTIDAS.md).

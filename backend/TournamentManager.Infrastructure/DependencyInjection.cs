@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IDeckLibrary, EfDeckLibrary>();
         services.AddScoped<ITournamentDrafts, EfTournamentDrafts>();
         services.AddScoped<ITournamentRegistrations, EfTournamentRegistrations>();
+        services.AddScoped<ITournamentMatches, EfTournamentMatches>();
 
         return services;
     }

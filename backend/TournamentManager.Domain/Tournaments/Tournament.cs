@@ -15,6 +15,14 @@ public sealed class Tournament
     public int ParticipationVersion { get; private set; }
     public DateTimeOffset? StartedAt { get; private set; }
     public FrozenTournamentRules? StartedRules { get; private set; }
+    public int MatchesVersion { get; private set; }
+
+    public void RecordMatchCreation()
+    {
+        if (Status != TournamentStatus.InProgress)
+            throw new TournamentConflictException("El torneo debe estar en curso.");
+        MatchesVersion++;
+    }
 
     public void Start(int participantCount, int presentedCount, int expectedRulesVersion, int expectedParticipationVersion, DateTimeOffset now)
     {

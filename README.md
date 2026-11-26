@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 07: Inicio y reglas históricas
+## Estado — Slice 08: Partidas manuales y resultados
 
 Implementado en código:
 
@@ -26,6 +26,8 @@ El Slice 05 agrega configuración de puntos por resultado, política de bye y or
 El Slice 06 permite compartir un enlace de inscripción, anotarse con una cuenta sin mazo y presentarlo después. Se conserva una copia privada independiente de la biblioteca; solo el jugador ve su lista y el organizador únicamente el estado de presentación. El mazo será obligatorio para iniciar en Slice 07. Aplicar `AddTournamentRegistrations`. Ver [contratos, privacidad y verificaciones](docs/slices/06-INSCRIPCIONES.md).
 
 El Slice 07 permite iniciar al organizador propietario con reglas configuradas, mínimo dos jugadores y todos los mazos presentados. Conserva una copia independiente de las reglas para que cambios futuros no afecten el torneo. Antes del inicio, solo el jugador puede reemplazar su presentación con motivo e historial privado. Aplicar `AddTournamentStartAndSubmissionHistory`. Ver [contratos, migración y verificaciones](docs/slices/07-INICIO.md).
+
+El Slice 08 agrega partidas manuales por ronda y resultados con correcciones auditadas, solo para el organizador propietario. Calcula puntos con las reglas congeladas y preserva todas las versiones. Aplicar `AddManualMatches`. Ver [contratos, alcance y verificaciones](docs/slices/08-PARTIDAS.md).
 
 Documentos: [`AGENTS.md`](AGENTS.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/TOURNAMENT_RULES.md`](docs/TOURNAMENT_RULES.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/slices/01-CATALOGO.md`](docs/slices/01-CATALOGO.md).
 
@@ -124,7 +126,7 @@ En este equipo, Windows Smart App Control bloquea la DLL de dominio en los tests
 
 ## Siguiente slice
 
-**08 — Partidas manuales y resultados:** se abordará después de revisar el Slice 07. No se adelantaron enfrentamientos ni cálculos de clasificación.
+**09 — Tabla básica:** clasificación por puntos reconstruida desde resultados vigentes y reglas históricas. No se implementó todavía.
 
 ### Política de seguridad de dependencias
 

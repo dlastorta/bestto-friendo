@@ -17,7 +17,7 @@ namespace TournamentManager.Tests;
 
 public sealed class PostgresTournamentStartTests
 {
-    private static async Task<(Guid TournamentId, Guid OwnerId, Guid PlayerId, Guid DeckId)> Seed(
+    internal static async Task<(Guid TournamentId, Guid OwnerId, Guid PlayerId, Guid DeckId)> Seed(
         WebApplicationFactory<Program> factory, HttpClient owner, HttpClient player)
     {
         var email = $"start-owner-{Guid.NewGuid():N}@example.test";

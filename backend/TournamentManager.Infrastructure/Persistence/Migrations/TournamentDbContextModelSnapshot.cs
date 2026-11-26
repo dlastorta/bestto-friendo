@@ -421,6 +421,40 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("tournament_started_rules", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.MatchResultRevision", b =>
+                {
+                    b.Property<Guid>("MatchId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ActorPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("MatchId", "Number");
+
+                    b.ToTable("match_result_revisions", (string)null);
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.Property<Guid>("Id")
@@ -428,6 +462,10 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("MatchesVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -517,6 +555,44 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasIndex("SourceDeckId", "SourceRevision");
 
                     b.ToTable("tournament_deck_snapshots", (string)null);
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentMatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlayerOneId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PlayerTwoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Round")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerOneId");
+
+                    b.HasIndex("PlayerTwoId");
+
+                    b.HasIndex("TournamentId", "Round");
+
+                    b.ToTable("tournament_matches", (string)null);
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>
@@ -679,6 +755,15 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.MatchResultRevision", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Tournaments.TournamentMatch", null)
+                        .WithMany("Results")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Games.Game", null)
@@ -705,6 +790,27 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasOne("TournamentManager.Domain.Decks.DeckRevision", null)
                         .WithMany()
                         .HasForeignKey("SourceDeckId", "SourceRevision")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentMatch", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerOneId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerTwoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -748,6 +854,11 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Navigation("Rules");
 
                     b.Navigation("StartedRules");
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentMatch", b =>
+                {
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>

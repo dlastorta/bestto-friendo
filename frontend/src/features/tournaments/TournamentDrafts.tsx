@@ -5,6 +5,7 @@ import { tournamentRequest, TournamentPermissionError, type Tournament } from '.
 import { TournamentRulesEditor } from './TournamentRulesEditor'
 import { TournamentParticipants } from './Registrations'
 import { TournamentStart } from './TournamentStart'
+import { TournamentMatches } from './TournamentMatches'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -95,6 +96,7 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
           <TournamentStart key={`start-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
           <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}-${selected.status}`} tournament={{ ...selected, rules: selected.startedRules ?? selected.rules }} onSaved={setSelected} onAccessLost={onAccessLost} />
           <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
+          {selected.status === 'InProgress' && <TournamentMatches key={`matches-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
         </article>}
       </div>
     </div>

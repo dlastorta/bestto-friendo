@@ -1,6 +1,6 @@
 # Reglas de dominio — Tournament Manager
 
-Estado: reglas acordadas y propuestas explícitamente distinguidas. Actualizadas el 2026-11-22.
+Estado: reglas acordadas y propuestas explícitamente distinguidas. Actualizadas el 2026-11-26.
 
 ## 1. Principios acordados
 
@@ -107,6 +107,15 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - El estado pasa de `Draft` a `InProgress`. No permite nuevas inscripciones, presentaciones, reemplazos ni cambios de reglas; tampoco un segundo inicio ni volver a borrador. La biblioteca personal puede seguir editándose sin alterar snapshots.
 - Inicio y cambios concurrentes se excluyen de forma atómica. Un conflicto exige recargar y revisar antes de reintentar.
 - El inicio no publica el torneo ni sus listas. Todo el historial de presentaciones sigue siendo privado del jugador.
+
+### Partidas y resultados — Slice 08
+
+- El organizador propietario crea partidas y carga/corrige resultados en torneos en curso. Los jugadores no reportan resultados en este slice. Estas vistas administrativas siguen privadas.
+- Cada partida tiene número de ronda positivo y dos jugadores distintos inscriptos; un jugador participa como máximo en una partida de esa ronda. La numeración es manual, sin apertura/cierre de rondas ni comprobación de que la ronda anterior terminó. La prevención de revancha entre rondas pertenece al algoritmo suizo del Slice 12.
+- Resultados iniciales: victoria del primer jugador, victoria del segundo o empate. Tipo `Played` o `Forfeit`; forfeit exige ganador y usa puntos normales de victoria/derrota. No implica retirar al jugador del torneo. No hay bye, doble derrota, marcador de juegos internos ni anulación todavía.
+- Primera carga y correcciones guardan actor y fecha. Corregir exige motivo de 1 a 500 caracteres y conserva todas las revisiones. Un conflicto de versión exige recargar; no hay sobrescritura silenciosa.
+- Los puntos se derivan de la revisión vigente y de `StartedRules`, sin totales mutables. La futura tabla del Slice 09 reconstruirá acumulados desde esas fuentes y reflejará las correcciones. No se calcula clasificación en Slice 08.
+- Las partidas no revelan listas ni referencias de mazos. No se editan contendientes ni se borran partidas/resultados; cualquier futura anulación deberá diseñarse con auditoría.
 
 ### Reglas para los resultados futuros
 

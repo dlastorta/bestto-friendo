@@ -381,6 +381,46 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("players", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.FrozenTournamentRules", b =>
+                {
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ByePoints")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
+                    b.Property<bool>("ByesEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("DrawPoints")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
+                    b.Property<decimal>("LossPoints")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
+                    b.Property<int>("MaximumByesPerParticipant")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SourceVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("WinPoints")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
+                    b.PrimitiveCollection<string[]>("_tieBreakers")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("tie_breakers");
+
+                    b.HasKey("TournamentId");
+
+                    b.ToTable("tournament_started_rules", (string)null);
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.Property<Guid>("Id")
@@ -409,7 +449,11 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
 
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Status")
+                        .IsConcurrencyToken()
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
@@ -431,6 +475,12 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("RegistrationId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ActorPlayerId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
 
@@ -446,6 +496,11 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("PresentedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<Guid>("SourceDeckId")
                         .HasColumnType("uuid");
 
@@ -457,7 +512,7 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid[]")
                         .HasColumnName("faction_ids");
 
-                    b.HasKey("RegistrationId");
+                    b.HasKey("RegistrationId", "Number");
 
                     b.HasIndex("SourceDeckId", "SourceRevision");
 
@@ -615,6 +670,15 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.FrozenTournamentRules", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithOne("StartedRules")
+                        .HasForeignKey("TournamentManager.Domain.Tournaments.FrozenTournamentRules", "TournamentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Games.Game", null)
@@ -633,8 +697,8 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Tournaments.TournamentRegistration", null)
-                        .WithOne("Snapshot")
-                        .HasForeignKey("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", "RegistrationId")
+                        .WithMany("Snapshots")
+                        .HasForeignKey("RegistrationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -682,11 +746,13 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.Navigation("Rules");
+
+                    b.Navigation("StartedRules");
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentRegistration", b =>
                 {
-                    b.Navigation("Snapshot");
+                    b.Navigation("Snapshots");
                 });
 #pragma warning restore 612, 618
         }

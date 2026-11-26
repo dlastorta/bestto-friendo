@@ -4,7 +4,8 @@ import { deckRequest, type DeckSummary } from '../decks/api'
 import { tournamentRequest, TournamentPermissionError } from './api'
 
 type Entry = { tournamentId: string; name: string; gameId: string; hasPresentedDeck: boolean }
-type Detail = { tournamentId: string; hasPresentedDeck: boolean; deck: { name: string; listText: string; sourceRevision: number } | null }
+type PresentedDeck = { name: string; listText: string; sourceRevision: number; number: number; reason: string; presentedAt: string }
+type Detail = { tournamentId: string; hasPresentedDeck: boolean; deck: PresentedDeck | null; status: string }
 type Invitation = { tournamentId: string; name: string; gameId: string; status: string }
 
 export async function registrationRequest<T>(path = '', body?: unknown): Promise<T> {
@@ -21,7 +22,7 @@ export async function registrationRequest<T>(path = '', body?: unknown): Promise
   return response.json() as Promise<T>
 }
 
-export function TournamentParticipants({ tournamentId, onAccessLost }: { tournamentId: string; onAccessLost: () => void }) {
+export function TournamentParticipants({ tournamentId, status = 'Draft', onAccessLost }: { tournamentId: string; status?: string; onAccessLost: () => void }) {
   const [link, setLink] = useState('')
   const [participants, setParticipants] = useState<{ playerId: string; displayName: string; hasPresentedDeck: boolean }[]>([])
   const [error, setError] = useState('')
@@ -41,7 +42,7 @@ export function TournamentParticipants({ tournamentId, onAccessLost }: { tournam
     <h4>Inscripciones</h4>
     <p>Compartí el enlace con los jugadores. Solo ellos pueden ver sus listas.</p>
     {error && <p role="alert">{error}</p>}
-    <button disabled={busy} onClick={() => void run(async () => {
+    <button disabled={busy || status !== 'Draft'} onClick={() => void run(async () => {
       const result = await tournamentRequest<{ token: string }>(`/${tournamentId}/registration-link`, {})
       if (mounted.current) setLink(`${window.location.origin}/#inscripcion=${result.token}`)
     })}>Obtener enlace de inscripción</button>
@@ -61,6 +62,8 @@ export function Registrations({ onSessionExpired }: { onSessionExpired: () => vo
   const [selected, setSelected] = useState<Detail | null>(null)
   const [decks, setDecks] = useState<DeckSummary[]>([])
   const [deckId, setDeckId] = useState('')
+  const [reason, setReason] = useState('')
+  const [history, setHistory] = useState<PresentedDeck[]>([])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const mounted = useRef(false)
@@ -84,7 +87,7 @@ export function Registrations({ onSessionExpired }: { onSessionExpired: () => vo
     if (mounted.current) setEntries(result)
   }
   async function open(entry: Entry) {
-    setSelected(null); setDecks([]); setDeckId('')
+    setSelected(null); setDecks([]); setDeckId(''); setReason(''); setHistory([])
     const [detail, available] = await Promise.all([
       registrationRequest<Detail>(`/${entry.tournamentId}`), deckRequest<DeckSummary[]>(`?gameId=${entry.gameId}`),
     ])
@@ -110,17 +113,27 @@ export function Registrations({ onSessionExpired }: { onSessionExpired: () => vo
         <button onClick={() => void run(() => open(entry))}>{entry.name}</button> · {entry.hasPresentedDeck ? 'Mazo presentado' : 'Mazo pendiente'}
       </li>)}</ul>
       {selected && <article aria-label="Mi presentación">
-        {selected.deck ? <><h3>{selected.deck.name}</h3><p>Revisión de origen: {selected.deck.sourceRevision}</p><pre>{selected.deck.listText}</pre></> : <>
+        {selected.deck && <><h3>{selected.deck.name}</h3><p>Presentación {selected.deck.number} · Revisión de origen: {selected.deck.sourceRevision}</p><pre>{selected.deck.listText}</pre></>}
+        {selected.status === 'InProgress' ? <p>El torneo comenzó: la presentación está bloqueada.</p> : <>
           <label>Mazo a presentar<select value={deckId} onChange={e => setDeckId(e.target.value)}>
             <option value="">Elegí un mazo propio</option>{decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select></label>
-          <p>Se guardará una copia. Editar tu biblioteca después no la cambia. El reemplazo todavía no está disponible.</p>
-          <button disabled={!deckId} onClick={() => void run(async () => {
-            const result = await registrationRequest<Detail>(`/${selected.tournamentId}/deck`, { deckId, expectedDeckVersion: decks.find(d => d.id === deckId)?.version })
-            if (mounted.current) setSelected(result)
+          <p>Se guardará una copia. Editar tu biblioteca después no la cambia. Los reemplazos conservan las presentaciones anteriores.</p>
+          {selected.deck && <label>Motivo del reemplazo<input value={reason} maxLength={500} onChange={e => setReason(e.target.value)} /></label>}
+          <button disabled={!deckId || (selected.deck !== null && !reason.trim())} onClick={() => void run(async () => {
+            const result = await registrationRequest<Detail>(`/${selected.tournamentId}/deck${selected.deck ? '/replace' : ''}`, {
+              deckId, expectedDeckVersion: decks.find(d => d.id === deckId)?.version,
+              ...(selected.deck ? { expectedPresentationVersion: selected.deck.number, reason } : {}),
+            })
+            if (mounted.current) { setSelected(result); setReason(''); setHistory([]) }
             await refresh()
-          })}>Presentar mazo</button>
+          })}>{selected.deck ? 'Reemplazar presentación' : 'Presentar mazo'}</button>
         </>}
+        <button onClick={() => void run(async () => {
+          const result = await registrationRequest<PresentedDeck[]>(`/${selected.tournamentId}/deck/history`)
+          if (mounted.current) setHistory(result)
+        })}>Ver historial de presentaciones</button>
+        {history.map(s => <details key={s.number}><summary>Presentación {s.number} · {s.reason}</summary><p>{s.name} · {new Date(s.presentedAt).toLocaleString()}</p><pre>{s.listText}</pre></details>)}
       </article>}
     </fieldset>
   </section>

@@ -6,11 +6,12 @@ namespace TournamentManager.Application.Features.Tournaments;
 
 public sealed record RegistrationInvitation(Guid TournamentId, string Name, Guid GameId, string Status);
 public sealed record ParticipantStatus(Guid PlayerId, string DisplayName, bool HasPresentedDeck);
-public sealed record MyRegistration(Guid TournamentId, string Name, Guid GameId, bool HasPresentedDeck);
+public sealed record MyRegistration(Guid TournamentId, string Name, Guid GameId, bool HasPresentedDeck, string Status = "Draft");
 public sealed record PresentedDeck(Guid SourceDeckId, int SourceRevision, Guid GameId, string Name,
-    string ListText, IReadOnlyList<Guid> FactionIds, DateTimeOffset PresentedAt);
-public sealed record RegistrationDetail(Guid TournamentId, bool HasPresentedDeck, PresentedDeck? Deck);
+    string ListText, IReadOnlyList<Guid> FactionIds, DateTimeOffset PresentedAt, int Number, Guid ActorPlayerId, string Reason);
+public sealed record RegistrationDetail(Guid TournamentId, bool HasPresentedDeck, PresentedDeck? Deck, string Status = "Draft");
 public sealed record PresentDeck(Guid DeckId, int? ExpectedDeckVersion);
+public sealed record ReplacePresentedDeck(Guid DeckId, int? ExpectedDeckVersion, int? ExpectedPresentationVersion, string? Reason);
 
 public interface ITournamentRegistrations
 {
@@ -45,6 +46,19 @@ public sealed class TournamentRegistrationsHandler(ICurrentAccount current, IPla
         return token;
     }
 
+    public async Task<bool> StartAsync(Guid id, StartTournament command, CancellationToken ct)
+    {
+        var tournament = await OwnedAsync(id, ct);
+        if (tournament is null) return false;
+        if (command.ExpectedRulesVersion is null || command.ExpectedParticipationVersion is null)
+            throw new TournamentRuleViolationException("Recargá el torneo para indicar las versiones esperadas.");
+        var participants = await registrations.ListParticipantsAsync(id, ct);
+        tournament.Start(participants.Count, participants.Count(p => p.HasPresentedDeck), command.ExpectedRulesVersion.Value,
+            command.ExpectedParticipationVersion.Value, DateTimeOffset.UtcNow);
+        await drafts.SaveAsync(tournament, ct);
+        return true;
+    }
+
     public async Task<IReadOnlyList<ParticipantStatus>?> ParticipantsAsync(Guid id, CancellationToken ct) =>
         await OwnedAsync(id, ct) is null ? null : await registrations.ListParticipantsAsync(id, ct);
 
@@ -61,10 +75,10 @@ public sealed class TournamentRegistrationsHandler(ICurrentAccount current, IPla
         var tournament = await registrations.FindByTokenAsync(token, ct);
         if (tournament is null) return null;
         var existing = await registrations.FindAsync(tournament.Id, player, ct);
-        if (existing is not null) return Detail(existing);
+        if (existing is not null) return Detail(existing, tournament);
         var registration = TournamentRegistration.Create(tournament, player, DateTimeOffset.UtcNow);
         await registrations.AddAsync(registration, ct);
-        return Detail(registration);
+        return Detail(registration, tournament);
     }
 
     public async Task<IReadOnlyList<MyRegistration>> ListMineAsync(CancellationToken ct) =>
@@ -72,8 +86,10 @@ public sealed class TournamentRegistrationsHandler(ICurrentAccount current, IPla
 
     public async Task<RegistrationDetail?> GetMineAsync(Guid id, CancellationToken ct)
     {
-        var registration = await registrations.FindAsync(id, await PlayerAsync(ct), ct);
-        return registration is null ? null : Detail(registration);
+        var player = await PlayerAsync(ct);
+        var tournament = await registrations.FindForPlayerAsync(id, player, ct);
+        var registration = await registrations.FindAsync(id, player, ct);
+        return registration is null || tournament is null ? null : Detail(registration, tournament);
     }
 
     public async Task<RegistrationDetail?> PresentAsync(Guid id, PresentDeck command, CancellationToken ct)
@@ -87,10 +103,32 @@ public sealed class TournamentRegistrationsHandler(ICurrentAccount current, IPla
         if (command.ExpectedDeckVersion is null) throw new TournamentRuleViolationException("Debés indicar la versión del mazo.");
         registration.Present(tournament, deck, command.ExpectedDeckVersion.Value, DateTimeOffset.UtcNow);
         await registrations.SaveAsync(ct);
-        return Detail(registration);
+        return Detail(registration, tournament);
     }
 
-    private static RegistrationDetail Detail(TournamentRegistration registration) => new(registration.TournamentId,
-        registration.Snapshot is not null, registration.Snapshot is { } s
-            ? new(s.SourceDeckId, s.SourceRevision, s.GameId, s.Name, s.ListText, s.FactionIds.ToArray(), s.PresentedAt) : null);
+    public async Task<IReadOnlyList<PresentedDeck>?> HistoryAsync(Guid id, CancellationToken ct)
+    {
+        var registration = await registrations.FindAsync(id, await PlayerAsync(ct), ct);
+        return registration?.Snapshots.OrderByDescending(s => s.Number).Select(SnapshotDto).ToArray();
+    }
+
+    public async Task<RegistrationDetail?> ReplaceAsync(Guid id, ReplacePresentedDeck command, CancellationToken ct)
+    {
+        var player = await PlayerAsync(ct);
+        var tournament = await registrations.FindForPlayerAsync(id, player, ct);
+        var registration = await registrations.FindAsync(id, player, ct);
+        if (registration is null || tournament is null) return null;
+        var deck = await decks.FindOwnedAsync(command.DeckId, player, ct);
+        if (deck is null) return null;
+        if (command.ExpectedDeckVersion is null || command.ExpectedPresentationVersion is null)
+            throw new TournamentRuleViolationException("Debés indicar las versiones del mazo y de la presentación.");
+        registration.Replace(tournament, deck, command.ExpectedDeckVersion.Value, command.ExpectedPresentationVersion.Value, command.Reason, DateTimeOffset.UtcNow);
+        await registrations.SaveAsync(ct);
+        return Detail(registration, tournament);
+    }
+
+    private static PresentedDeck SnapshotDto(TournamentDeckSnapshot s) =>
+        new(s.SourceDeckId, s.SourceRevision, s.GameId, s.Name, s.ListText, s.FactionIds.ToArray(), s.PresentedAt, s.Number, s.ActorPlayerId, s.Reason);
+    private static RegistrationDetail Detail(TournamentRegistration registration, Tournament tournament) => new(registration.TournamentId,
+        registration.Snapshot is not null, registration.Snapshot is { } s ? SnapshotDto(s) : null, tournament.Status.ToString());
 }

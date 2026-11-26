@@ -10,8 +10,8 @@ Estado: reglas acordadas y propuestas explícitamente distinguidas. Actualizadas
 4. La configuración de puntuación y desempate se congela cuando el torneo inicia.
 5. Un participante no puede recibir más de **un bye** en un torneo.
 6. Un bye no equivale a jugar contra un oponente real; las políticas específicas para cada desempate deben definirse y probarse.
-7. Un jugador tiene una **biblioteca personal de mazos reutilizables** y selecciona uno al inscribirse.
-8. Al inscribirse, se guarda un **snapshot histórico e independiente** del mazo presentado. El registro del torneo no es un enlace vivo al contenido actual de la biblioteca.
+7. Un jugador tiene una **biblioteca personal de mazos reutilizables** y presenta uno antes del inicio del torneo; puede inscribirse sin mazo inicialmente.
+8. Al presentar el mazo, se guarda un **snapshot histórico e independiente**. El registro del torneo no es un enlace vivo al contenido actual de la biblioteca.
 9. El ranking Elo global queda fuera del MVP.
 
 ## 2. Identidad y propiedad
@@ -65,7 +65,7 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 
 ## 5. Presentación del mazo en un torneo
 
-**Regla confirmada:** al inscribirse, seleccionar un mazo de la biblioteca genera una copia histórica de su contenido y metadatos relevantes.
+**Regla confirmada:** presentar un mazo de la biblioteca para una inscripción genera una copia histórica de su contenido y metadatos relevantes.
 
 **Privacidad confirmada para Slice 06 (2026-11-25):** solo el jugador puede ver su lista presentada. El organizador únicamente ve si presentó un mazo, sin acceso a su contenido. La autorización se aplica también en API; ocultar el contenido en la interfaz no es suficiente.
 
@@ -76,7 +76,7 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - Una inscripción utiliza **un solo mazo**; variantes multideck o cambios entre rondas requieren un slice posterior.
 - La copia almacena al menos: identificadores del torneo/participante, mazo original y revisión original (para trazabilidad), nombre, juego/formato, afiliaciones, texto de lista, etiquetas/arquetipo declarados, momento de presentación y hash opcional.
 - Modificar un mazo personal **no** cambia la presentación.
-- Hasta que empiece el torneo, un jugador/organizador autorizado puede reemplazar **explícitamente** la presentación: se registra una nueva revisión de la presentación y queda trazabilidad de la anterior.
+- Confirmado en Slice 07: hasta que empiece el torneo, solo el jugador puede reemplazar **explícitamente** su presentación con motivo obligatorio, actor, fecha y versiones anteriores preservadas. El organizador no puede sustituir ni consultar listas ajenas.
 - Al iniciar el torneo, se bloquean las presentaciones; excepciones administrativas futuras deberán ser explícitas y auditadas.
 - El sistema debe impedir la presentación de un mazo perteneciente a otro juego. Las restricciones de formato más sofisticadas llegarán después.
 - Archivar o borrar de la biblioteca no borra automáticamente los datos que respaldan resultados históricos; definir por separado políticas de retención, privacidad y eliminación de datos personales.
@@ -98,6 +98,15 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - Byes habilitados/deshabilitados con puntaje propio; máximo uno por participante fijo, sin mecanismo de asignación todavía.
 - Se conserva una secuencia sin duplicados de Buchholz, OMW% y/o Buchholz con descarte. Puede estar vacía. Esta configuración no implementa fórmulas ni resuelve las variantes pendientes.
 - Un guardado desactualizado se rechaza; no se sobrescriben silenciosamente cambios de otra petición.
+
+### Inicio y reglas históricas — Slice 07 (confirmado el 2026-11-26)
+
+- Solo el organizador propietario inicia el torneo. Exige reglas configuradas, al menos dos jugadores inscriptos y presentación de mazo de todos ellos.
+- Al iniciar se conserva una copia independiente e inmutable de los puntos por resultado, política de bye y orden de desempates, junto con versión de origen y fecha de inicio. Cambiar reglas posteriormente no debe afectar el torneo ni sus resultados históricos.
+- Los cálculos futuros deben usar esa copia histórica. Si cambian las fórmulas o su interpretación, deberán conservar su semántica mediante versionado explícito; las fórmulas siguen pendientes, no se implementan en este slice.
+- El estado pasa de `Draft` a `InProgress`. No permite nuevas inscripciones, presentaciones, reemplazos ni cambios de reglas; tampoco un segundo inicio ni volver a borrador. La biblioteca personal puede seguir editándose sin alterar snapshots.
+- Inicio y cambios concurrentes se excluyen de forma atómica. Un conflicto exige recargar y revisar antes de reintentar.
+- El inicio no publica el torneo ni sus listas. Todo el historial de presentaciones sigue siendo privado del jugador.
 
 ### Reglas para los resultados futuros
 

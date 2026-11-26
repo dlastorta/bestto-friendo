@@ -4,6 +4,7 @@ import { AuthenticationError } from '../identity/api'
 import { tournamentRequest, TournamentPermissionError, type Tournament } from './api'
 import { TournamentRulesEditor } from './TournamentRulesEditor'
 import { TournamentParticipants } from './Registrations'
+import { TournamentStart } from './TournamentStart'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -84,14 +85,16 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
         {loading ? <p role="status">Cargando torneos…</p> : tournaments.length === 0 ? <p>No hay torneos para este filtro.</p> :
           <ul className="tournament-list">{tournaments.map(tournament => <li key={tournament.id}>
             <button type="button" disabled={busy} onClick={() => void open(tournament.id)}>{tournament.name}</button>
-            <span>Borrador · {games.find(game => game.id === tournament.gameId)?.name}</span>
+            <span>{tournament.status === 'Draft' ? 'Borrador' : 'En curso'} · {games.find(game => game.id === tournament.gameId)?.name}</span>
           </li>)}</ul>}
         {selected && <article className="tournament-detail" aria-labelledby="tournament-detail-heading">
           <h3 id="tournament-detail-heading">Detalle del torneo</h3>
           <dl><dt>Nombre</dt><dd>{selected.name}</dd><dt>Juego</dt><dd>{games.find(game => game.id === selected.gameId)?.name}</dd>
             <dt>Estado</dt><dd>{selected.status === 'Draft' ? 'Borrador' : selected.status}</dd><dt>Visibilidad</dt><dd>Privado</dd></dl>
-          <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}`} tournament={selected} onSaved={setSelected} onAccessLost={onAccessLost} />
-          <TournamentParticipants key={selected.id} tournamentId={selected.id} onAccessLost={onAccessLost} />
+          <button disabled={busy} onClick={() => void open(selected.id)}>Recargar detalle del torneo</button>
+          <TournamentStart key={`start-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
+          <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}-${selected.status}`} tournament={{ ...selected, rules: selected.startedRules ?? selected.rules }} onSaved={setSelected} onAccessLost={onAccessLost} />
+          <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
         </article>}
       </div>
     </div>

@@ -13,6 +13,22 @@ public sealed class Tournament
     public TournamentRules? Rules { get; private set; }
     public Guid? RegistrationToken { get; private set; }
     public int ParticipationVersion { get; private set; }
+    public DateTimeOffset? StartedAt { get; private set; }
+    public FrozenTournamentRules? StartedRules { get; private set; }
+
+    public void Start(int participantCount, int presentedCount, int expectedRulesVersion, int expectedParticipationVersion, DateTimeOffset now)
+    {
+        EnsureDraft();
+        if (RulesVersion != expectedRulesVersion || ParticipationVersion != expectedParticipationVersion)
+            throw new TournamentConflictException("El torneo cambió. Recargá antes de iniciar.");
+        if (Rules is null) throw new TournamentRuleViolationException("Configurá las reglas antes de iniciar.");
+        if (participantCount < 2) throw new TournamentRuleViolationException("Se necesitan al menos dos jugadores para iniciar.");
+        if (presentedCount != participantCount) throw new TournamentRuleViolationException("Todos los jugadores deben presentar un mazo antes de iniciar.");
+        StartedRules = FrozenTournamentRules.Capture(Id, Rules, RulesVersion);
+        StartedAt = now;
+        Status = TournamentStatus.InProgress;
+        ParticipationVersion++;
+    }
 
     public Guid EnableRegistrationLink()
     {
@@ -64,6 +80,6 @@ public sealed class Tournament
     }
 }
 
-public enum TournamentStatus { Draft }
+public enum TournamentStatus { Draft, InProgress }
 
 public sealed class TournamentRuleViolationException(string message) : Exception(message);

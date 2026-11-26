@@ -47,8 +47,9 @@ export function TournamentRulesEditor({ tournament, onSaved, onAccessLost }: {
     try {
       const result = await tournamentRequest<Tournament>(`/${tournament.id}`)
       if (mounted.current) {
-        setPoints(Object.fromEntries(pointFields.map(({ key }) => [key, result.rules?.[key]?.toString() ?? ''])))
-        setByes(result.rules ? String(result.rules.byesEnabled) : ''); setOrder(result.rules?.tieBreakers ?? []); setChoice('')
+        const rules = result.startedRules ?? result.rules
+        setPoints(Object.fromEntries(pointFields.map(({ key }) => [key, rules?.[key]?.toString() ?? ''])))
+        setByes(rules ? String(rules.byesEnabled) : ''); setOrder(rules?.tieBreakers ?? []); setChoice('')
         onSaved(result)
       }
     } catch (cause) { fail(cause) }

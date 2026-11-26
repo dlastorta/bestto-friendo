@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–05 integrados; Slice 06 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-25.
+Estado: Slices 01–06 integrados; Slice 07 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-26.
 
 ## Objetivo
 
@@ -26,7 +26,7 @@ Aplicación web para organizar torneos de distintos juegos, comenzando por el si
 | 04. Crear torneos | Crear/listar/consultar torneos borrador asociados a juego. | Juego válido; rol `TournamentOrganizer` obligatorio y borradores privados del creador. Formatos avanzados postergados. |
 | 05. Reglas de torneo | Configurar puntos por resultado, política de bye y secuencia ordenada de criterios de desempate. | Orden de desempate persistido; configuración editable solo en borrador. |
 | 06. Inscripciones y deck snapshot | Inscribir jugadores y seleccionar un mazo propio del juego compatible; almacenar copia del mazo presentado. | La inscripción referencia al mazo de origen **y** conserva un snapshot autónomo; modificaciones posteriores en biblioteca no lo actualizan. |
-| 07. Comenzar torneo | Validar condiciones de arranque; bloquear reglas y presentaciones de mazos. | No pueden modificarse reglas ni snapshots ya bloqueados. Las sustituciones previas se hacen mediante una acción explícita, auditada. |
+| 07. Comenzar torneo | Validar arranque y conservar reglas históricas independientes; bloquear inscripciones y presentaciones. | Organizador propietario, reglas configuradas, mínimo dos jugadores y todos los mazos presentados. Solo el jugador puede sustituir su presentación antes del inicio, con motivo e historial privado. |
 | 08. Partidas manuales y resultados | Crear enfrentamientos manuales, cargar/corregir resultados y registrar el motivo (jugado, forfeit, etc.). | Puntos derivados de las reglas; correcciones recalculan clasificaciones. |
 | 09. Tabla básica | Mostrar clasificación por puntos. | Se reconstruye desde resultados y reglas; no usa un total mutable como fuente de verdad. |
 | 10. Cadena de desempates | Configurar y calcular secuencialmente Buchholz, OMW%, Buchholz con descarte, según definiciones concretas. | Si persiste igualdad se evalúa el criterio siguiente, sin reordenar arbitrariamente. Implementar políticas de rondas no jugadas antes de aceptar resultados oficiales. |
@@ -88,8 +88,6 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 ## Decisiones aún pendientes
 
 - Facciones principales/secundarias, combinación de colores y sus restricciones por juego/formato.
-- La inscripción no requiere mazo inicialmente; debe presentarse antes del inicio (confirmado en Slice 06). Implementar la validación de inicio en Slice 07.
-- Qué actores pueden cambiar una presentación de mazo antes del inicio.
 - Qué campos de listas y estrategias son públicos, privados o visibles solo tras el cierre.
 - Cálculos exactos de Buchholz/OMW% y rondas no jugadas, límites y criterio final de desempate.
 - Regla suiza precisa de asignación de bye cuando múltiples jugadores son candidatos.
@@ -103,3 +101,4 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 04:** borradores privados para organizadores, con creación/listado/consulta por juego. Ver [`slices/04-TORNEOS.md`](slices/04-TORNEOS.md).
 - **Slice 05:** configuración explícita de puntos, byes y orden de desempates solo en borrador; todavía sin cálculos. Ver [`slices/05-REGLAS.md`](slices/05-REGLAS.md).
 - **Slice 06:** inscripción por enlace sin mazo inicial, presentación posterior de snapshot privado y estado visible al organizador. Ver [`slices/06-INSCRIPCIONES.md`](slices/06-INSCRIPCIONES.md).
+- **Slice 07:** inicio, reglas históricas autónomas y sustitución auditada privada antes del inicio. Ver [`slices/07-INICIO.md`](slices/07-INICIO.md).

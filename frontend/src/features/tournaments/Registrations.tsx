@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AuthenticationError, csrfHeaders } from '../identity/api'
 import { deckRequest, type DeckSummary } from '../decks/api'
 import { tournamentRequest, TournamentPermissionError } from './api'
+import { Standings } from './Standings'
 
 type Entry = { tournamentId: string; name: string; gameId: string; hasPresentedDeck: boolean }
 type PresentedDeck = { name: string; listText: string; sourceRevision: number; number: number; reason: string; presentedAt: string }
@@ -113,6 +114,7 @@ export function Registrations({ onSessionExpired }: { onSessionExpired: () => vo
         <button onClick={() => void run(() => open(entry))}>{entry.name}</button> · {entry.hasPresentedDeck ? 'Mazo presentado' : 'Mazo pendiente'}
       </li>)}</ul>
       {selected && <article aria-label="Mi presentación">
+        {selected.status === 'InProgress' && <Standings key={selected.tournamentId} tournamentId={selected.tournamentId} onAccessLost={onSessionExpired} />}
         {selected.deck && <><h3>{selected.deck.name}</h3><p>Presentación {selected.deck.number} · Revisión de origen: {selected.deck.sourceRevision}</p><pre>{selected.deck.listText}</pre></>}
         {selected.status === 'InProgress' ? <p>El torneo comenzó: la presentación está bloqueada.</p> : <>
           <label>Mazo a presentar<select value={deckId} onChange={e => setDeckId(e.target.value)}>

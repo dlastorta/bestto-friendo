@@ -147,3 +147,10 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - La tabla aplica los desempates en la secuencia configurada.
 - Las estadísticas de win rate por mazo no tratan los byes como enfrentamientos.
 - El torneo puede finalizarse sin hacerse público, y una lista privada no debe mostrarse por error en la página publicada.
+
+## Tabla básica — Slice 09 (confirmado)
+
+- Visible al organizador propietario con rol vigente y a jugadores inscriptos, nunca pública. Si el organizador pierde su rol pero está inscripto, conserva únicamente el acceso de participante a la tabla.
+- Puntos de mayor a menor desde resultados vigentes y reglas históricas; pendientes no suman. Todos los inscriptos aparecen, incluso con cero puntos.
+- Igual puntaje implica igual puesto, con numeración 1, 1, 3. Orden secundario por ID solo estabiliza la presentación, no rompe empates deportivos.
+- Las correcciones se reflejan al consultar nuevamente, sin sumar revisiones anteriores. No aplica desempates, byes ni estadísticas de win rate.

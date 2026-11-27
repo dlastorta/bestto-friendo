@@ -9,11 +9,11 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 12 — Emparejamientos suizos
+## Slice actual: 13 — Cierre, reapertura y regeneración auditada
 
-**Permitido:** generar rondas suizas según docs/slices/12-SUIZO.md; asignación manual de byes según docs/slices/11-BYES.md; tabla por puntos para organizador propietario con rol vigente y jugadores inscriptos; puestos compartidos (1, 1, 3) si persiste igualdad tras los criterios congelados. Aplicar fórmulas versión 1 de docs/slices/10-DESEMPATES.md solo a nuevos inicios; versión 0 conserva puntos. Reconstruir desde resultados vigentes y StartedRules, sin totales persistidos ni listas de mazos. Ver `docs/slices/09-TABLA.md`. Mantener slices anteriores; el organizador propietario crea partidas por ronda en torneos en curso y carga/corrige resultados. Dos jugadores distintos inscriptos, una partida por jugador y ronda. Victoria/derrota o empate; forfeit con ganador y puntos normales. Correcciones con motivo e historial de actor/fecha. Puntos derivados exclusivamente de `StartedRules`. Ver `docs/slices/08-PARTIDAS.md`.
+**Permitido:** cerrar torneos completos, reabrir con motivo exclusivamente para corregir resultados y volver a cerrar; regenerar explícitamente solo la última ronda antes del primer cierre, conservando versiones anuladas y resultados según docs/slices/13-CIERRE.md. Mantener y generar rondas suizas según docs/slices/12-SUIZO.md; asignación manual de byes según docs/slices/11-BYES.md; tabla por puntos para organizador propietario con rol vigente y jugadores inscriptos; puestos compartidos (1, 1, 3) si persiste igualdad tras los criterios congelados. Aplicar fórmulas versión 1 de docs/slices/10-DESEMPATES.md solo a nuevos inicios; versión 0 conserva puntos. Reconstruir desde resultados vigentes y StartedRules, sin totales persistidos ni listas de mazos. Ver `docs/slices/09-TABLA.md`. Mantener slices anteriores; el organizador propietario crea partidas por ronda en torneos en curso y carga/corrige resultados. Dos jugadores distintos inscriptos, una partida por jugador y ronda. Victoria/derrota o empate; forfeit con ganador y puntos normales. Correcciones con motivo e historial de actor/fecha. Puntos derivados exclusivamente de `StartedRules`. Ver `docs/slices/08-PARTIDAS.md`.
 
-**No permitido en Slice 12:** regenerar o sobrescribir rondas existentes, cancelación/edición de byes, publicación/finalización/eliminación de torneos, cambio de reglas históricas, edición de contendientes o borrado de partidas/resultados, conciliación de invitados, Elo, legalidad/importación de cartas. Google y Swagger UI quedan para después. Nunca exponer listas de mazos desde partidas.
+**No permitido en Slice 13:** regenerar rondas anteriores a la última o cualquier ronda después del primer cierre, sobrescribir/borrar historial, cancelación/edición independiente de byes, publicación/eliminación de torneos, cambio de reglas históricas, edición de contendientes o borrado de partidas/resultados, conciliación de invitados, Elo, legalidad/importación de cartas. Google y Swagger UI quedan para después. Nunca exponer listas de mazos desde partidas.
 
 **Seguridad temporal:** crear juegos requiere `CatalogAdmin`; administrar torneos requiere `TournamentOrganizer`. Inscripción por enlace y presentación propia requieren sesión, sin rol administrativo. Perfil, biblioteca, inscripciones y snapshots se determinan por la cuenta autenticada, sin privilegios sobre listas ajenas. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
@@ -75,7 +75,7 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 12
+## Definition of Done — Slice 13
 
 - Partidas manuales API/React solo para el organizador propietario, en torneo iniciado, con jugadores inscriptos distintos y sin duplicación por ronda.
 - Resultado y correcciones con historial inmutable, actor de sesión, fecha, tipo y motivo; versiones esperadas impiden sobrescrituras.
@@ -108,3 +108,6 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Byes manuales con política congelada versión 1 en nuevos inicios: organizador propietario, inscriptos impares, máximo uno por ronda/jugador y sin partida en esa ronda. Puntos históricos sin rival ficticio; excluidos de MWP/lista de rivales, incluidos en totales de Buchholz. Concurrencia bye/partida atómica y actor/fecha auditados. Ver docs/slices/11-BYES.md.
 
 - Primera ronda aleatoria auditada; siguientes desde menor puntaje/resistencia, sin revanchas (incluido forfeit), bye al peor elegible que permita completar. Avance solo con rondas anteriores completas. Algoritmo congelado versión 1 en nuevos inicios, históricos manuales versión 0. Ronda atómica frente a asignaciones y correcciones concurrentes; no modificar cruces al corregir resultados. Ver docs/slices/12-SUIZO.md.
+
+- Cierre solo con al menos una ronda completa, sin pendientes ni jugadores sin asignación; reapertura con motivo, exclusivamente para correcciones. Cada cierre conserva referencias exactas a resultados y byes.
+- Regeneración explícita solo de la última ronda antes del primer cierre, con motivo y versiones esperadas; pares y bye reemplazados atómicamente, resultados anteriores preservados pero excluidos de la tabla.

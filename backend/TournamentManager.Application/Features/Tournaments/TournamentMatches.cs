@@ -8,7 +8,7 @@ public sealed record RecordMatchResult(string? Outcome, string? Kind, string? Re
 public sealed record MatchResultDto(int Number, string Outcome, string Kind, string Reason, Guid ActorPlayerId,
     DateTimeOffset RecordedAt, decimal PlayerOnePoints, decimal PlayerTwoPoints);
 public sealed record MatchDto(Guid Id, int Round, Guid PlayerOneId, Guid PlayerTwoId, int Version,
-    MatchResultDto? Result, IReadOnlyList<MatchResultDto>? History = null);
+    MatchResultDto? Result, IReadOnlyList<MatchResultDto>? History = null, int RoundRevision = 1, bool IsSuperseded = false);
 
 public interface ITournamentMatches
 {
@@ -69,7 +69,7 @@ public sealed class TournamentMatchesHandler(ICurrentAccount current, IPlayerPro
         return ToDto(match, tournament, true);
     }
 
-    private static MatchDto ToDto(TournamentMatch match, Tournament tournament, bool history = false)
+    internal static MatchDto ToDto(TournamentMatch match, Tournament tournament, bool history = false)
     {
         MatchResultDto Result(MatchResultRevision r)
         {
@@ -78,6 +78,6 @@ public sealed class TournamentMatchesHandler(ICurrentAccount current, IPlayerPro
         }
         return new(match.Id, match.Round, match.PlayerOneId, match.PlayerTwoId, match.Version,
             match.CurrentResult is { } result ? Result(result) : null,
-            history ? match.Results.OrderByDescending(r => r.Number).Select(Result).ToArray() : null);
+            history ? match.Results.OrderByDescending(r => r.Number).Select(Result).ToArray() : null, match.RoundRevision, match.IsSuperseded);
     }
 }

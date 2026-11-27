@@ -24,7 +24,7 @@ export function TournamentStart({ tournament, onSaved, onAccessLost }: {
       }
     } finally { if (mounted.current) setBusy(false) }
   }
-  if (tournament.status !== 'Draft') return <p role="status">Torneo en curso. Reglas históricas y presentaciones bloqueadas. Inicio: {tournament.startedAt ? new Date(tournament.startedAt).toLocaleString() : 'registrado'}.</p>
+  if (tournament.status !== 'Draft') return <p role="status">{tournament.status === 'Finished' ? 'Torneo finalizado.' : tournament.status === 'Correction' ? 'Torneo reabierto para correcciones.' : 'Torneo en curso.'} Reglas históricas y presentaciones bloqueadas. Inicio: {tournament.startedAt ? new Date(tournament.startedAt).toLocaleString() : 'registrado'}.</p>
   return <section aria-label="Inicio del torneo">
     {error && <p role="alert">{error}</p>}
     {!confirming ? <button onClick={() => setConfirming(true)}>Comenzar torneo</button> : <>

@@ -5,7 +5,7 @@ import { tournamentRequest, TournamentPermissionError } from './api'
 type Bye = { id: string; round: number; playerId: string; points: number; actorPlayerId: string; assignedAt: string }
 type Player = { playerId: string; displayName: string }
 
-export function TournamentByes({ tournamentId, onAccessLost }: { tournamentId: string; onAccessLost: () => void }) {
+export function TournamentByes({ tournamentId, status = 'InProgress', onAccessLost }: { tournamentId: string; status?: string; onAccessLost: () => void }) {
   const [byes, setByes] = useState<Bye[]>([])
   const [players, setPlayers] = useState<Player[]>([])
   const [round, setRound] = useState('1')
@@ -38,7 +38,7 @@ export function TournamentByes({ tournamentId, onAccessLost }: { tournamentId: s
     {error && <p role="alert">{error}</p>}
     <fieldset disabled={busy}>
       <button onClick={() => void run(refresh)}>Consultar byes</button>
-      <form onSubmit={event => { event.preventDefault(); void run(async () => {
+      {status === 'InProgress' && <form onSubmit={event => { event.preventDefault(); void run(async () => {
         await tournamentRequest<Bye>(path, { round: Number(round), playerId: player })
         if (mounted.current) setPlayer('')
         await refresh()
@@ -48,7 +48,7 @@ export function TournamentByes({ tournamentId, onAccessLost }: { tournamentId: s
           <option value="">Elegí jugador</option>{players.map(p => <option key={p.playerId} value={p.playerId}>{p.displayName}</option>)}
         </select></label>
         <button disabled={!player}>Asignar bye</button>
-      </form>
+      </form>}
       <ul>{byes.map(b => <li key={b.id}>Ronda {b.round}: {name(b.playerId)} · Bye · {b.points} puntos
         <p>Asignó {name(b.actorPlayerId)} · {new Date(b.assignedAt).toLocaleString()}</p>
       </li>)}</ul>

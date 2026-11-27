@@ -41,7 +41,12 @@ public sealed class PostgresSwissTests
         var before = await owner.GetStringAsync(path);
         Assert.DoesNotContain("Privado", before); Assert.DoesNotContain("deck", before, StringComparison.OrdinalIgnoreCase);
         (await owner.PostAsJsonAsync($"/api/tournaments/{id}/matches/{matchId}/result", new RecordMatchResult("PlayerOneWin", "Forfeit", "Corrección posterior", 1))).EnsureSuccessStatusCode();
-        Assert.Equal(before, await owner.GetStringAsync(path));
+        var after = await owner.GetStringAsync(path);
+        using var beforeJson = System.Text.Json.JsonDocument.Parse(before);
+        using var afterJson = System.Text.Json.JsonDocument.Parse(after);
+        Assert.Equal(beforeJson.RootElement.GetProperty("rounds").GetRawText(), afterJson.RootElement.GetProperty("rounds").GetRawText());
+        Assert.Equal(beforeJson.RootElement.GetProperty("resultsVersion").GetInt32() + 1,
+            afterJson.RootElement.GetProperty("resultsVersion").GetInt32());
         Assert.True((await owner.GetAsync(path)).Headers.CacheControl!.NoStore);
         using (var scope = factory.Services.CreateScope())
         {

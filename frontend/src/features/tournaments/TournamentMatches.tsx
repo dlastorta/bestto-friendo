@@ -6,7 +6,7 @@ type Result = { number: number; outcome: string; kind: string; reason: string; a
 type Match = { id: string; round: number; playerOneId: string; playerTwoId: string; version: number; result: Result | null; history?: Result[] }
 type Player = { playerId: string; displayName: string }
 
-export function TournamentMatches({ tournamentId, onAccessLost }: { tournamentId: string; onAccessLost: () => void }) {
+export function TournamentMatches({ tournamentId, status = 'InProgress', onAccessLost }: { tournamentId: string; status?: string; onAccessLost: () => void }) {
   const [players, setPlayers] = useState<Player[]>([])
   const [matches, setMatches] = useState<Match[]>([])
   const [selected, setSelected] = useState<Match | null>(null)
@@ -49,7 +49,7 @@ export function TournamentMatches({ tournamentId, onAccessLost }: { tournamentId
     {error && <p role="alert">{error}</p>}
     <fieldset disabled={busy}>
       <button onClick={() => void run(async () => { await refresh(); if (mounted.current) setSelected(null) })}>Consultar partidas</button>
-      <form onSubmit={event => { event.preventDefault(); void run(async () => {
+      {status === 'InProgress' && <form onSubmit={event => { event.preventDefault(); void run(async () => {
         const match = await tournamentRequest<Match>(path, { round: Number(round), playerOneId: one, playerTwoId: two })
         if (mounted.current) { select(match); setOne(''); setTwo('') }
         await refresh()
@@ -58,7 +58,7 @@ export function TournamentMatches({ tournamentId, onAccessLost }: { tournamentId
         <label>Jugador 1<select required value={one} onChange={e => setOne(e.target.value)}><option value="">Elegí jugador</option>{players.map(p => <option key={p.playerId} value={p.playerId}>{p.displayName}</option>)}</select></label>
         <label>Jugador 2<select required value={two} onChange={e => setTwo(e.target.value)}><option value="">Elegí jugador</option>{players.map(p => <option key={p.playerId} value={p.playerId}>{p.displayName}</option>)}</select></label>
         <button disabled={!one || !two}>Crear partida</button>
-      </form>
+      </form>}
       <ul>{matches.map(m => <li key={m.id}>
         <button onClick={() => void run(async () => {
           const detail = await tournamentRequest<Match>(`${path}/${m.id}`)
@@ -69,7 +69,7 @@ export function TournamentMatches({ tournamentId, onAccessLost }: { tournamentId
       {selected && <article aria-label="Resultado de partida">
         <h5>{name(selected.playerOneId)} vs {name(selected.playerTwoId)} · Ronda {selected.round}</h5>
         {selected.result && <p>{resultText(selected, selected.result)}</p>}
-        <form onSubmit={event => { event.preventDefault(); void run(async () => {
+        {status !== 'Finished' && <form onSubmit={event => { event.preventDefault(); void run(async () => {
           const updated = await tournamentRequest<Match>(`${path}/${selected.id}/result`, { outcome, kind, reason, expectedVersion: selected.version })
           if (mounted.current) select(updated)
           await refresh()
@@ -80,7 +80,7 @@ export function TournamentMatches({ tournamentId, onAccessLost }: { tournamentId
           <label>Tipo de resultado<select value={kind} onChange={e => setKind(e.target.value)}><option value="Played">Partida jugada</option><option value="Forfeit">Forfeit / abandono de esta partida</option></select></label>
           <label>Motivo de la corrección o nota<input required={selected.version > 0} maxLength={500} value={reason} onChange={e => setReason(e.target.value)} /></label>
           <button disabled={!outcome || (selected.version > 0 && !reason.trim())}>{selected.version > 0 ? 'Corregir resultado' : 'Guardar resultado'}</button>
-        </form>
+        </form>}
         {selected.history?.map(r => <details key={r.number}><summary>Versión {r.number} · {r.reason}</summary>
           <p>{resultText(selected, r)}</p><p>Registró {name(r.actorPlayerId)} · {new Date(r.recordedAt).toLocaleString()}</p>
         </details>)}

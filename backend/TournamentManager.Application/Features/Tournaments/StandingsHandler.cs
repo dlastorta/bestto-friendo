@@ -17,7 +17,7 @@ public sealed class StandingsHandler(ICurrentAccount current, IPlayerProfiles pr
         var tournament = current.CanOrganizeTournaments ? await tournaments.FindOwnedAsync(id, player.Id, ct) : null;
         tournament ??= await registrations.FindForPlayerAsync(id, player.Id, ct);
         if (tournament is null) return null;
-        if (tournament.Status != TournamentStatus.InProgress || tournament.StartedRules is null)
+        if (tournament.Status == TournamentStatus.Draft || tournament.StartedRules is null)
             throw new TournamentConflictException("La tabla está disponible cuando el torneo está en curso.");
         var participants = await registrations.ListParticipantsAsync(id, ct);
         var names = participants.ToDictionary(p => p.PlayerId, p => p.DisplayName);

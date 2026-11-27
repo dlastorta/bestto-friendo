@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–11 integrados; Slice 12 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-27.
+Estado: Slices 01–12 integrados; Slice 13 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-27.
 
 ## Objetivo
 
@@ -111,3 +111,11 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 11:** byes manuales, límites por ronda/jugador, imparidad, puntos históricos y exclusión de enfrentamientos. Ver [contratos](slices/11-BYES.md).
 
 - **Slice 12:** sorteo inicial, siguientes rondas desde abajo de la tabla, sin revanchas, bye elegible, avance con resultados completos y guardado atómico. Ver [contratos](slices/12-SUIZO.md).
+
+## Playoffs futuros — Regeneración del cuadro
+
+Antes de iniciar un Top 8, permitir correcciones de resultados previos y regeneración explícita del cuadro desde la clasificación actualizada, preservando el cuadro reemplazado en el historial. Confirmado por el usuario; fuera de Slice 13 y del MVP actual. Queda pendiente definir qué ocurre si los playoffs ya comenzaron.
+
+## Slice 13 — Alcance confirmado
+
+Cierre manual con todas las rondas completas, reapertura con motivo solo para corregir resultados y volver a cerrar. Antes del primer cierre se permite regenerar explícitamente únicamente la última ronda, preservando versiones y resultados anulados. Nunca regenerar después del cierre, tampoco al reabrir. Finalizar no publica. Ver [contratos y verificación](slices/13-CIERRE.md).

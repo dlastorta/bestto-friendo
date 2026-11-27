@@ -10,8 +10,8 @@ public static class TournamentStandings
         var totals = participants.Distinct().ToDictionary(id => id, _ => 0m);
         if (rules.TieBreakerFormulaVersion is not (0 or 1))
             throw new TournamentRuleViolationException("Versión de desempates no soportada.");
-        var all = matches.Where(m => m.TournamentId == rules.TournamentId).ToArray();
-        foreach (var bye in (byes ?? []).Where(b => b.TournamentId == rules.TournamentId))
+        var all = matches.Where(m => m.TournamentId == rules.TournamentId && !m.IsSuperseded).ToArray();
+        foreach (var bye in (byes ?? []).Where(b => b.TournamentId == rules.TournamentId && !b.IsSuperseded))
         {
             if (rules.ByePolicyVersion != 1)
                 throw new TournamentRuleViolationException("Política histórica de bye no soportada.");

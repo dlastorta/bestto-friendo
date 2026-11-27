@@ -12,6 +12,10 @@ public sealed class TournamentMatch
     public Guid CreatedByPlayerId { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public int Version { get; private set; }
+    public int RoundRevision { get; private set; } = 1;
+    public bool IsSuperseded { get; private set; }
+    internal void Supersede() => IsSuperseded = true;
+    internal void SetRoundRevision(int revision) => RoundRevision = revision;
     public IReadOnlyCollection<MatchResultRevision> Results => _results.AsReadOnly();
     public MatchResultRevision? CurrentResult => _results.MaxBy(r => r.Number);
 
@@ -43,7 +47,8 @@ public sealed class TournamentMatch
     public void RecordResult(Tournament tournament, string? outcome, string? kind, string? reason,
         int expectedVersion, Guid actor, DateTimeOffset now)
     {
-        EnsureInProgress(tournament);
+        if (tournament.Status is not (TournamentStatus.InProgress or TournamentStatus.Correction) || tournament.StartedRules is null || IsSuperseded)
+            throw new TournamentConflictException("No se pueden modificar resultados de un torneo cerrado ni de una ronda reemplazada.");
         if (tournament.Id != TournamentId) throw new TournamentRuleViolationException("La partida no pertenece al torneo.");
         if (Version != expectedVersion) throw new TournamentConflictException("El resultado cambió. Recargá antes de guardar.");
         if (outcome is not ("PlayerOneWin" or "PlayerTwoWin" or "Draw") || kind is not ("Played" or "Forfeit"))

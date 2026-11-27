@@ -148,3 +148,9 @@ TournamentBye representa una asignación inmutable sin rival ni resultado de par
 ## Slice 12
 
 SwissRound calcula pares y bye en Domain y conserva orden, actor, fecha y versiones fuente. RoundProgress valida avance completo. ISwissRounds confirma toda la ronda en Infrastructure con un SaveChanges transaccional. ResultsVersion y MatchesVersion protegen generación frente a cargas/correcciones y asignaciones concurrentes. PairingAlgorithmVersion congela política para nuevos inicios y preserva manuales históricos. El sorteo inicial usa aleatoriedad del servidor; Domain recibe el orden para pruebas reproducibles. React confirma y presenta sin duplicar reglas. Ver [detalle](slices/12-SUIZO.md).
+
+## Slice 13
+
+Tournament controla estados Finished y Correction, con LifecycleVersion como token concurrente junto con versiones de asignaciones/resultados y Status. TournamentLifecycleEvent conserva actor, fecha, motivo y referencias a revisiones de resultados y byes por cierre. No persiste acumulados deportivos.
+
+Regenerar conserva SwissRound por número/revisión; las asignaciones anuladas tienen IsSuperseded y quedan fuera de consultas deportivas mediante filtros EF y de la tabla mediante reglas puras. Los índices únicos de bye solo cubren asignaciones vigentes. EfSwissRounds guarda anulación y nuevas asignaciones dentro de una transacción; un conflicto revierte ambas. Los endpoints de historial son privados del organizador. La migración bloquea rollback si borraría historial del Slice 13.

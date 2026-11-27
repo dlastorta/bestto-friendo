@@ -2,6 +2,7 @@ namespace TournamentManager.Domain.Tournaments;
 
 public sealed class Tournament
 {
+    private readonly List<TournamentLifecycleEvent> _lifecycle = [];
     private Tournament() { }
 
     public Guid Id { get; private set; }
@@ -17,6 +18,45 @@ public sealed class Tournament
     public FrozenTournamentRules? StartedRules { get; private set; }
     public int MatchesVersion { get; private set; }
     public int ResultsVersion { get; private set; }
+    public int LifecycleVersion { get; private set; }
+    public DateTimeOffset? FinishedAt { get; private set; }
+    public IReadOnlyCollection<TournamentLifecycleEvent> Lifecycle => _lifecycle.AsReadOnly();
+
+    public void Finish(IReadOnlyCollection<Guid> participants, IReadOnlyCollection<TournamentMatch> matches,
+        IReadOnlyCollection<TournamentBye> byes, int expectedLifecycle, int expectedMatches, int expectedResults,
+        Guid actor, DateTimeOffset now)
+    {
+        if (Status is not (TournamentStatus.InProgress or TournamentStatus.Correction) || StartedRules is null)
+            throw new TournamentConflictException("Solo se puede finalizar un torneo en curso o reabierto para correcciones.");
+        EnsureVersions(expectedLifecycle, expectedMatches, expectedResults);
+        if (matches.Any(m => m.TournamentId != Id) || byes.Any(b => b.TournamentId != Id))
+            throw new TournamentRuleViolationException("Las asignaciones no pertenecen al torneo.");
+        var active = matches.Where(m => !m.IsSuperseded).ToArray();
+        var activeByes = byes.Where(b => !b.IsSuperseded).ToArray();
+        if (active.Length == 0) throw new TournamentConflictException("Se requiere al menos una ronda completa para finalizar.");
+        RoundProgress.EnsureComplete(participants, active, activeByes);
+        Status = TournamentStatus.Finished;
+        FinishedAt = now;
+        LifecycleVersion++;
+        _lifecycle.Add(new(Id, LifecycleVersion, "Finished", "Cierre confirmado", actor, now, active, activeByes));
+    }
+
+    public void Reopen(string? reason, int expectedLifecycle, Guid actor, DateTimeOffset now)
+    {
+        if (Status != TournamentStatus.Finished || LifecycleVersion != expectedLifecycle)
+            throw new TournamentConflictException("El estado del torneo cambió. Recargá antes de reabrir.");
+        var note = (reason ?? "").Trim();
+        if (note.Length is < 1 or > 500) throw new TournamentRuleViolationException("Indicá un motivo de entre 1 y 500 caracteres.");
+        Status = TournamentStatus.Correction;
+        LifecycleVersion++;
+        _lifecycle.Add(new(Id, LifecycleVersion, "Reopened", note, actor, now, [], []));
+    }
+
+    public void EnsureVersions(int lifecycle, int matches, int results)
+    {
+        if (LifecycleVersion != lifecycle || MatchesVersion != matches || ResultsVersion != results)
+            throw new TournamentConflictException("El torneo o sus resultados cambiaron. Recargá antes de continuar.");
+    }
 
     internal void RecordResultChange() => ResultsVersion++;
 
@@ -91,6 +131,6 @@ public sealed class Tournament
     }
 }
 
-public enum TournamentStatus { Draft, InProgress }
+public enum TournamentStatus { Draft, InProgress, Finished, Correction }
 
 public sealed class TournamentRuleViolationException(string message) : Exception(message);

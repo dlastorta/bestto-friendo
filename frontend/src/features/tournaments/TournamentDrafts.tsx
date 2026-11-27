@@ -9,6 +9,7 @@ import { TournamentMatches } from './TournamentMatches'
 import { TournamentByes } from './TournamentByes'
 import { SwissRounds } from './SwissRounds'
 import { Standings } from './Standings'
+import { TournamentLifecycle } from './TournamentLifecycle'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -89,7 +90,7 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
         {loading ? <p role="status">Cargando torneos…</p> : tournaments.length === 0 ? <p>No hay torneos para este filtro.</p> :
           <ul className="tournament-list">{tournaments.map(tournament => <li key={tournament.id}>
             <button type="button" disabled={busy} onClick={() => void open(tournament.id)}>{tournament.name}</button>
-            <span>{tournament.status === 'Draft' ? 'Borrador' : 'En curso'} · {games.find(game => game.id === tournament.gameId)?.name}</span>
+            <span>{tournament.status === 'Draft' ? 'Borrador' : tournament.status === 'Finished' ? 'Finalizado' : tournament.status === 'Correction' ? 'En corrección' : 'En curso'} · {games.find(game => game.id === tournament.gameId)?.name}</span>
           </li>)}</ul>}
         {selected && <article className="tournament-detail" aria-labelledby="tournament-detail-heading">
           <h3 id="tournament-detail-heading">Detalle del torneo</h3>
@@ -98,11 +99,12 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
           <button disabled={busy} onClick={() => void open(selected.id)}>Recargar detalle del torneo</button>
           <TournamentStart key={`start-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
           <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}-${selected.status}`} tournament={{ ...selected, rules: selected.startedRules ?? selected.rules }} onSaved={setSelected} onAccessLost={onAccessLost} />
+          <TournamentLifecycle key={`lifecycle-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
           <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
-          {selected.status === 'InProgress' && <TournamentMatches key={`matches-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
-          {selected.status === 'InProgress' && <TournamentByes key={`byes-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
-          {selected.status === 'InProgress' && <SwissRounds key={`rounds-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
-          {selected.status === 'InProgress' && <Standings key={`standings-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status !== 'Draft' && <TournamentMatches key={`matches-${selected.id}-${selected.status}`} status={selected.status} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status !== 'Draft' && <TournamentByes status={selected.status} key={`byes-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status !== 'Draft' && <SwissRounds status={selected.status} key={`rounds-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status !== 'Draft' && <Standings key={`standings-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
         </article>}
       </div>
     </div>

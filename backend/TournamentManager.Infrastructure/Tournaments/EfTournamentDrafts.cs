@@ -19,7 +19,7 @@ internal sealed class EfTournamentDrafts(TournamentDbContext db) : ITournamentDr
             .OrderBy(item => item.Name).ThenBy(item => item.Id).ToListAsync(ct);
 
     public Task<Tournament?> FindOwnedAsync(Guid id, Guid organizerPlayerId, CancellationToken ct) =>
-        db.Tournaments.Include(item => item.Rules).Include(item => item.StartedRules).SingleOrDefaultAsync(item => item.Id == id && item.OrganizerPlayerId == organizerPlayerId, ct);
+        db.Tournaments.Include(item => item.Rules).Include(item => item.StartedRules).Include(item => item.Lifecycle).SingleOrDefaultAsync(item => item.Id == id && item.OrganizerPlayerId == organizerPlayerId, ct);
 
     public async Task SaveAsync(Tournament tournament, CancellationToken ct)
     {
@@ -27,7 +27,7 @@ internal sealed class EfTournamentDrafts(TournamentDbContext db) : ITournamentDr
         catch (DbUpdateConcurrencyException)
         { throw new TournamentConflictException("El torneo cambió. Recargá antes de guardar."); }
         catch (DbUpdateException ex) when (ex.InnerException is Npgsql.PostgresException
-            { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation, ConstraintName: "PK_tournament_rules" })
+            { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation, ConstraintName: "PK_tournament_rules" or "PK_tournament_lifecycle_events" })
         { throw new TournamentConflictException("Las reglas cambiaron. Recargá antes de guardar."); }
     }
 }

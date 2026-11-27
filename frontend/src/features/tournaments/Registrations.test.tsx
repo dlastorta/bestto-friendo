@@ -11,11 +11,11 @@ it('inscribe por enlace sin exigir mazo y permite presentarlo después con CSRF'
   const request = vi.fn(async (url: string, options?: RequestInit) => {
     if (url === '/api/auth/csrf') return response({ token: 'csrf' })
     if (url === '/api/registrations/invite/token') return response(options?.method === 'POST'
-      ? { tournamentId: 'cup', hasPresentedDeck: false, deck: null } : { tournamentId: 'cup', name: 'Copa', gameId: 'game', status: 'Draft' })
-    if (url === '/api/registrations') return response([{ tournamentId: 'cup', name: 'Copa', gameId: 'game', hasPresentedDeck: presented }])
+      ? { tournamentId: 'cup', status: 'Draft', hasPresentedDeck: false, deck: null } : { tournamentId: 'cup', name: 'Copa', gameId: 'game', status: 'Draft' })
+    if (url === '/api/registrations') return response([{ tournamentId: 'cup', name: 'Copa', gameId: 'game', status: 'Draft', hasPresentedDeck: presented }])
     if (url === '/api/decks?gameId=game') return response([{ id: 'deck', name: 'Propio', version: 3 }])
-    if (url === '/api/registrations/cup/deck') { presented = true; return response({ tournamentId: 'cup', hasPresentedDeck: true, deck: { name: 'Propio', listText: 'Lista literal', sourceRevision: 2 } }) }
-    return response({ tournamentId: 'cup', hasPresentedDeck: false, deck: null })
+    if (url === '/api/registrations/cup/deck') { presented = true; return response({ tournamentId: 'cup', status: 'Draft', hasPresentedDeck: true, deck: { name: 'Propio', listText: 'Lista literal', sourceRevision: 2 } }) }
+    return response({ tournamentId: 'cup', status: 'Draft', hasPresentedDeck: false, deck: null })
   })
   vi.stubGlobal('fetch', request)
   render(<Registrations onSessionExpired={vi.fn()} />)
@@ -51,10 +51,10 @@ it('notifica sesión vencida y retira la vista al desmontarse', async () => {
 it('conserva selección ante conflicto de presentación', async () => {
   vi.stubGlobal('fetch', vi.fn(async (url: string) => {
     if (url === '/api/auth/csrf') return response({ token: 'csrf' })
-    if (url === '/api/registrations') return response([{ tournamentId: 'cup', name: 'Copa', gameId: 'game', hasPresentedDeck: false }])
+    if (url === '/api/registrations') return response([{ tournamentId: 'cup', name: 'Copa', gameId: 'game', status: 'Draft', hasPresentedDeck: false }])
     if (url.startsWith('/api/decks')) return response([{ id: 'deck', name: 'Propio', version: 1 }])
     if (url.endsWith('/deck')) return response({ message: 'El mazo cambió. Recargá tu biblioteca.' }, 409)
-    return response({ tournamentId: 'cup', hasPresentedDeck: false, deck: null })
+    return response({ tournamentId: 'cup', status: 'Draft', hasPresentedDeck: false, deck: null })
   }))
   render(<Registrations onSessionExpired={vi.fn()} />)
   fireEvent.click(screen.getByRole('button', { name: 'Recargar mis inscripciones' }))

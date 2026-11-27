@@ -8,12 +8,43 @@ public sealed class SwissRound
     private SwissRound() { }
     public Guid TournamentId { get; private set; }
     public int Number { get; private set; }
+    public int Revision { get; private set; } = 1;
+    public bool IsSuperseded { get; private set; }
+    public string Reason { get; private set; } = "Generación inicial";
     public int AlgorithmVersion { get; private set; }
     public Guid ActorPlayerId { get; private set; }
     public DateTimeOffset GeneratedAt { get; private set; }
     public int SourceMatchesVersion { get; private set; }
     public int SourceResultsVersion { get; private set; }
     public IReadOnlyList<Guid> ParticipantOrder => Array.AsReadOnly(_participantOrder);
+
+    public static GeneratedRound Regenerate(Tournament tournament, int number, int expectedMatches, int expectedResults,
+        int expectedLifecycle, string? reason, IReadOnlyCollection<Guid> participants,
+        IReadOnlyCollection<TournamentMatch> matches, IReadOnlyCollection<TournamentBye> byes,
+        IReadOnlyCollection<SwissRound> history, IReadOnlyList<Guid> draw, Guid actor, DateTimeOffset now, CancellationToken ct = default)
+    {
+        tournament.EnsureVersions(expectedLifecycle, expectedMatches, expectedResults);
+        if (matches.Any(m => m.TournamentId != tournament.Id) || byes.Any(b => b.TournamentId != tournament.Id) ||
+            history.Any(r => r.TournamentId != tournament.Id))
+            throw new TournamentRuleViolationException("Las asignaciones deben pertenecer al torneo.");
+        if (tournament.Status != TournamentStatus.InProgress || number < 1 ||
+            RoundProgress.NextRound(matches, byes) - 1 != number)
+            throw new TournamentConflictException("Solo se puede regenerar la última ronda de un torneo en curso, nunca después de finalizar.");
+        var note = (reason ?? "").Trim();
+        if (note.Length is < 1 or > 500) throw new TournamentRuleViolationException("Indicá un motivo de entre 1 y 500 caracteres.");
+        var generated = Generate(tournament, number, participants, matches.Where(m => m.Round < number).ToArray(),
+            byes.Where(b => b.Round < number).ToArray(), draw, actor, now, ct);
+        var revision = history.Where(r => r.Number == number).Select(r => r.Revision)
+            .Concat(matches.Where(m => m.Round == number).Select(m => m.RoundRevision))
+            .Concat(byes.Where(b => b.Round == number).Select(b => b.RoundRevision)).DefaultIfEmpty(1).Max() + 1;
+        generated.Audit.Revision = revision; generated.Audit.Reason = note;
+        foreach (var m in generated.Matches) m.SetRoundRevision(revision);
+        generated.Bye?.SetRoundRevision(revision);
+        foreach (var old in matches.Where(m => m.Round == number)) old.Supersede();
+        foreach (var old in byes.Where(b => b.Round == number)) old.Supersede();
+        foreach (var old in history.Where(r => r.Number == number)) old.IsSuperseded = true;
+        return generated;
+    }
 
     public static GeneratedRound Generate(Tournament tournament, int expectedRound, IReadOnlyCollection<Guid> participants,
         IReadOnlyCollection<TournamentMatch> matches, IReadOnlyCollection<TournamentBye> byes,

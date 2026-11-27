@@ -472,6 +472,10 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
                     b.Property<Guid>("ActorPlayerId")
                         .HasColumnType("uuid");
 
@@ -480,6 +484,14 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("GeneratedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsSuperseded")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("SourceMatchesVersion")
                         .HasColumnType("integer");
@@ -492,7 +504,7 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid[]")
                         .HasColumnName("participant_order");
 
-                    b.HasKey("TournamentId", "Number");
+                    b.HasKey("TournamentId", "Number", "Revision");
 
                     b.HasIndex("ActorPlayerId");
 
@@ -504,8 +516,15 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("LifecycleVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
 
                     b.Property<int>("MatchesVersion")
                         .IsConcurrencyToken()
@@ -567,11 +586,18 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("AssignedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsSuperseded")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Round")
                         .HasColumnType("integer");
+
+                    b.Property<int>("RoundRevision")
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
@@ -583,10 +609,12 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasIndex("PlayerId");
 
                     b.HasIndex("TournamentId", "PlayerId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("NOT \"IsSuperseded\"");
 
                     b.HasIndex("TournamentId", "Round")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("NOT \"IsSuperseded\"");
 
                     b.ToTable("tournament_byes", (string)null);
                 });
@@ -640,6 +668,50 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("tournament_deck_snapshots", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentLifecycleEvent", b =>
+                {
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ActorPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.PrimitiveCollection<Guid[]>("_byeIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("bye_ids");
+
+                    b.PrimitiveCollection<Guid[]>("_matchIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("match_ids");
+
+                    b.PrimitiveCollection<int[]>("_resultNumbers")
+                        .IsRequired()
+                        .HasColumnType("integer[]")
+                        .HasColumnName("result_numbers");
+
+                    b.HasKey("TournamentId", "Number");
+
+                    b.ToTable("tournament_lifecycle_events", (string)null);
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentMatch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -651,6 +723,9 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CreatedByPlayerId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsSuperseded")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("PlayerOneId")
                         .HasColumnType("uuid");
 
@@ -659,6 +734,10 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("Round")
                         .HasColumnType("integer");
+
+                    b.Property<int>("RoundRevision")
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
@@ -913,6 +992,15 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentLifecycleEvent", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithMany("Lifecycle")
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentMatch", b =>
                 {
                     b.HasOne("TournamentManager.Domain.Players.Player", null)
@@ -970,6 +1058,8 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
+                    b.Navigation("Lifecycle");
+
                     b.Navigation("Rules");
 
                     b.Navigation("StartedRules");

@@ -170,3 +170,17 @@ Asignación manual del organizador propietario en torneo en curso con byes habil
 Primera ronda al azar, incluido el bye si hay cantidad impar; conservar orden sorteado. Desde la segunda, ordenar por puntos y cadena de resistencia histórica y armar desde abajo hacia arriba, prefiriendo rivales cercanos sin repetir ningún enfrentamiento, incluidos forfeits. Bye al peor clasificado sin bye previo que permita completar los cruces; probar siguientes elegibles si hace falta. Explorar alternativas en lugar de aceptar revanchas. Si no hay solución, error sin guardado parcial.
 
 No comenzar una ronda sin completar asignaciones y resultados de todas las anteriores. Generar la siguiente ronda completa sin sobrescribir rondas manuales. Los nuevos torneos también respetan avance y no revancha en creación manual; los históricos conservan modalidad anterior. Correcciones no regeneran cruces existentes. PairingAlgorithmVersion=1 para nuevos inicios, 0 para históricos. Ver [detalles y límites técnicos](slices/12-SUIZO.md).
+
+## Playoffs futuros — Correcciones antes del Top (confirmado)
+
+Antes de comenzar un Top 8, el organizador podrá corregir resultados de las rondas previas y regenerar explícitamente el cuadro usando la clasificación actualizada. Conservar el cuadro reemplazado en el historial; no reescribirlo silenciosamente. Es la extensión del criterio de regeneración de la última ronda al cuadro de playoffs aún no iniciado.
+
+Playoffs siguen fuera del MVP actual. El tratamiento de correcciones cuando el Top ya comenzó requiere una decisión futura; esta confirmación no autoriza anular partidas de playoffs ya disputadas.
+
+## Cierre y regeneración — Slice 13 (confirmado)
+
+El organizador propietario finaliza tras al menos una ronda y con todas las rondas existentes completas: todos los inscriptos asignados y todos los resultados cargados. El cierre no publica ni cambia la privacidad. Los torneos manuales históricos conservan su numeración, aunque tenga saltos.
+
+Después del cierre, reabrir explícitamente con motivo permite corregir resultados y finalizar otra vez, sin generar/regenerar rondas, partidas ni byes. Cada cierre conserva las versiones exactas de resultados y asignaciones que lo sustentaron; las correcciones no borran cierres previos.
+
+Antes del primer cierre, el organizador puede corregir resultados y pedir explícitamente regenerar solo la última ronda. Recalcular desde las rondas anteriores con reglas congeladas, reemplazar pares y bye y dejar nuevos resultados pendientes. Los resultados/asignaciones reemplazados quedan anulados para los cálculos, conservados en historial. No se regeneran rondas automáticamente. Esta decisión amplía la restricción anterior del Slice 12 sin permitir borrar historial ni editar contendientes directamente.

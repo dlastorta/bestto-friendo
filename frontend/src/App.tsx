@@ -67,7 +67,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 12</span>
+        <span className="milestone">SLICE 13</span>
       </header>
 
       <main className="main-content">
@@ -112,8 +112,8 @@ function App() {
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 13 · Finalizar torneo</h2>
-            <p>Cerrar el torneo y conservar su clasificación histórica.</p>
+            <h2>Slice 14 · Publicación</h2>
+            <p>Publicar resultados y metadatos permitidos mediante una acción independiente del cierre.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

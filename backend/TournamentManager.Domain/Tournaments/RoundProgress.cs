@@ -16,7 +16,15 @@ public static class RoundProgress
         var rounds = matches.Select(m => m.Round).Concat(byes.Select(b => b.Round)).Distinct().Order().ToArray();
         if (rounds.Any(r => r > round) || rounds.Count(r => r < round) != round - 1)
             throw new TournamentConflictException("Completá las rondas anteriores sin saltar números.");
-        foreach (var previous in rounds.Where(r => r < round))
+        EnsureComplete(participants, matches.Where(m => m.Round < round).ToArray(),
+            byes.Where(b => b.Round < round).ToArray());
+    }
+
+    public static void EnsureComplete(IReadOnlyCollection<Guid> participants,
+        IReadOnlyCollection<TournamentMatch> matches, IReadOnlyCollection<TournamentBye> byes)
+    {
+        var rounds = matches.Select(m => m.Round).Concat(byes.Select(b => b.Round)).Distinct();
+        foreach (var previous in rounds)
         {
             var games = matches.Where(m => m.Round == previous).ToArray();
             var occupied = games.SelectMany(m => new[] { m.PlayerOneId, m.PlayerTwoId })

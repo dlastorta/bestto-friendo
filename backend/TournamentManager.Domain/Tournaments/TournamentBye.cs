@@ -9,6 +9,10 @@ public sealed class TournamentBye
     public Guid PlayerId { get; private set; }
     public Guid ActorPlayerId { get; private set; }
     public DateTimeOffset AssignedAt { get; private set; }
+    public int RoundRevision { get; private set; } = 1;
+    public bool IsSuperseded { get; private set; }
+    internal void Supersede() => IsSuperseded = true;
+    internal void SetRoundRevision(int revision) => RoundRevision = revision;
 
     public static TournamentBye Assign(Tournament tournament, int round, Guid player,
         IReadOnlyCollection<Guid> participants, IReadOnlyCollection<TournamentMatch> matches,

@@ -145,3 +145,9 @@ El organizador puede asignar byes manuales en torneos iniciados con la política
 ## Slice 12 — Rondas suizas
 
 El organizador genera una ronda completa con confirmación. Primera ronda sorteada, siguientes desde menor puntaje/resistencia, sin revanchas y con bye al peor elegible. No avanza con resultados pendientes. Guarda sorteo y actor/fecha; respeta torneos manuales históricos y evita rondas parciales ante concurrencia. Ver [contratos, límites y pruebas](docs/slices/12-SUIZO.md).
+
+## Slice 13 — Cierre y correcciones
+
+En la vista del torneo, «Revisar cierre» permite confirmar la finalización cuando todas las rondas están completas. «Reabrir para corregir» exige motivo y habilita exclusivamente correcciones de resultados; después se puede finalizar nuevamente, conservando cada cierre.
+
+Antes del primer cierre, «Reemplazar únicamente la última ronda» en rondas suizas requiere motivo y confirmación. Conserva la versión anterior en historial y crea nuevos cruces pendientes a partir de las rondas previas. Nunca modifica rondas automáticamente al corregir. Finalizar no publica ni expone listas privadas. Ver [Slice 13](docs/slices/13-CIERRE.md).

@@ -8,7 +8,7 @@ public sealed record StandingDto(Guid PlayerId, string DisplayName, int Position
     int FormulaVersion, IReadOnlyList<StandingTieBreaker> TieBreakers);
 
 public sealed class StandingsHandler(ICurrentAccount current, IPlayerProfiles profiles, ITournamentDrafts tournaments,
-    ITournamentRegistrations registrations, ITournamentMatches matches)
+    ITournamentRegistrations registrations, ITournamentMatches matches, ITournamentByes byes)
 {
     public async Task<IReadOnlyList<StandingDto>?> GetAsync(Guid id, CancellationToken ct)
     {
@@ -21,7 +21,8 @@ public sealed class StandingsHandler(ICurrentAccount current, IPlayerProfiles pr
             throw new TournamentConflictException("La tabla está disponible cuando el torneo está en curso.");
         var participants = await registrations.ListParticipantsAsync(id, ct);
         var names = participants.ToDictionary(p => p.PlayerId, p => p.DisplayName);
-        return TournamentStandings.Calculate(names.Keys, await matches.ListAsync(id, ct), tournament.StartedRules)
+        return TournamentStandings.Calculate(names.Keys, await matches.ListAsync(id, ct), tournament.StartedRules,
+                await byes.ListAsync(id, ct))
             .Select(r => new StandingDto(r.PlayerId, names[r.PlayerId], r.Position, r.Points,
                 tournament.StartedRules.TieBreakerFormulaVersion,
                 r.TieBreakers.Select((v, i) => new StandingTieBreaker(tournament.StartedRules.TieBreakers[i], v.Rounded(6),

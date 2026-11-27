@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–09 integrados; Slice 10 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-27.
+Estado: Slices 01–10 integrados; Slice 11 implementado, pendiente de revisión y verificación visual. Actualizado el 2026-11-27.
 
 ## Objetivo
 
@@ -89,7 +89,7 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 
 - Facciones principales/secundarias, combinación de colores y sus restricciones por juego/formato.
 - Qué campos de listas y estrategias son públicos, privados o visibles solo tras el cierre.
-- Política de byes y su efecto en desempates; fórmulas, forfeits y pendientes definidos en Slice 10.
+- Selección automática de candidatos al bye en Slice 12; asignación manual y efecto en desempates confirmados en Slice 11.
 - Regla suiza precisa de asignación de bye cuando múltiples jugadores son candidatos.
 - Gestión de usuarios invitados y conciliación futura con una cuenta.
 
@@ -106,4 +106,6 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 
 - **Slice 09:** tabla por puntos para organizador e inscriptos, puestos compartidos y reconstrucción desde resultados vigentes. Ver [contratos](slices/09-TABLA.md).
 
-- **Slice 10:** cadena exacta versionada; fórmulas y exclusión de forfeits confirmadas. Ver [contratos](slices/10-DESEMPATES.md). Las políticas de byes siguen pendientes para Slice 11.
+- **Slice 10:** cadena exacta versionada; fórmulas y exclusión de forfeits confirmadas. Ver [contratos](slices/10-DESEMPATES.md). Política manual de byes confirmada en Slice 11.
+
+- **Slice 11:** byes manuales, límites por ronda/jugador, imparidad, puntos históricos y exclusión de enfrentamientos. Ver [contratos](slices/11-BYES.md).

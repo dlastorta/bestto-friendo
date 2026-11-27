@@ -125,7 +125,7 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - El orden de los desempates es parte de la configuración congelada del torneo.
 - Los puntos y las estadísticas se derivan de resultados verificables; no son contadores que se puedan modificar manualmente sin auditoría.
 
-**Pendiente:** tratamiento de byes y prioridad de candidatos para Slice 11. Las fórmulas, forfeits, pendientes y empates finales quedaron definidos en Slice 10.
+**Pendiente:** prioridad automática de candidatos para Slice 12. Las fórmulas, forfeits, pendientes y empates finales quedaron definidos en Slice 10.
 
 ## 7. Publicación y estadísticas
 
@@ -159,4 +159,8 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 
 Buchholz suma puntos actuales de rivales de partidas jugadas; Buchholz con descarte quita una contribución mínima. OMW% promedia la proporción de victorias de cada rival (empate=0,5), con mínimo exacto 1/3 por rival, sin depender de puntos configurables. Forfeits y pendientes no cuentan como enfrentamientos ni en MWP, aunque los puntos de forfeit siguen en los totales de rivales usados por Buchholz. Repeticiones de rival cuentan por encuentro. Sin rivales computables, valor cero. Si persiste igualdad tras toda la cadena, compartir puesto.
 
-Torneos ya iniciados conservan versión 0 (solo puntos); nuevos inicios capturan versión 1. Toda evolución debe preservar semántica histórica. Comparaciones exactas sin desempatar por redondeo. Ver casos, contrato y transición en [Slice 10](slices/10-DESEMPATES.md). Byes requieren decisión específica antes de implementarlos.
+Torneos ya iniciados conservan versión 0 (solo puntos); nuevos inicios capturan versión 1. Toda evolución debe preservar semántica histórica. Comparaciones exactas sin desempatar por redondeo. Ver casos, contrato y transición en [Slice 10](slices/10-DESEMPATES.md). El tratamiento confirmado de byes se detalla a continuación.
+
+## Byes — Slice 11 (confirmado)
+
+Asignación manual del organizador propietario en torneo en curso con byes habilitados; solo inscriptos sin partida en esa ronda ni bye previo. Máximo uno por ronda y por jugador en el torneo, exclusivamente con cantidad impar de inscriptos. Otorga puntos congelados sin rival ficticio ni contribución a MWP o lista de rivales de Buchholz/OMW%; sus puntos sí integran el total del jugador usado por sus rivales en Buchholz. Actor y fecha inmutables, sin edición/cancelación. Nuevos inicios congelan ByePolicyVersion=1; torneos ya iniciados conservan versión 0 sin asignación. Elección automática pendiente de Slice 12. Ver [contratos](slices/11-BYES.md).

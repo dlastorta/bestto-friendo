@@ -390,6 +390,9 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("numeric(9,2)");
 
+                    b.Property<int>("ByePolicyVersion")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("ByesEnabled")
                         .HasColumnType("boolean");
 
@@ -509,6 +512,41 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasIndex("OrganizerPlayerId", "GameId");
 
                     b.ToTable("tournaments", (string)null);
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentBye", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ActorPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Round")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorPlayerId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TournamentId", "PlayerId")
+                        .IsUnique();
+
+                    b.HasIndex("TournamentId", "Round")
+                        .IsUnique();
+
+                    b.ToTable("tournament_byes", (string)null);
                 });
 
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentDeckSnapshot", b =>
@@ -778,6 +816,27 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasOne("TournamentManager.Domain.Players.Player", null)
                         .WithMany()
                         .HasForeignKey("OrganizerPlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.TournamentBye", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("ActorPlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

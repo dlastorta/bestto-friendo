@@ -15,7 +15,7 @@ public sealed class TieBreakerTests
         var matches = new List<TournamentMatch>();
         foreach (var (round, one, two) in new[] { (1, 0, 1), (1, 2, 3), (2, 1, 2) })
         {
-            var m = TournamentMatch.Create(t, round, p[one], p[two], p, matches, t.OrganizerPlayerId, DateTimeOffset.UtcNow);
+            var m = TournamentMatch.Create(t, round, p[one], p[two], p, matches, t.OrganizerPlayerId, DateTimeOffset.UtcNow, []);
             m.RecordResult(t, "PlayerOneWin", "Played", null, 0, t.OrganizerPlayerId, DateTimeOffset.UtcNow); matches.Add(m);
         }
         var rows = TournamentStandings.Calculate(p, matches, t.StartedRules!);
@@ -35,7 +35,7 @@ public sealed class TieBreakerTests
         var matches = new List<TournamentMatch>();
         TournamentMatch Add(int round, int one, int two, string outcome, string kind)
         {
-            var m = TournamentMatch.Create(t, round, p[one], p[two], p, matches, t.OrganizerPlayerId, DateTimeOffset.UtcNow);
+            var m = TournamentMatch.Create(t, round, p[one], p[two], p, matches, t.OrganizerPlayerId, DateTimeOffset.UtcNow, []);
             m.RecordResult(t, outcome, kind, null, 0, t.OrganizerPlayerId, DateTimeOffset.UtcNow); matches.Add(m); return m;
         }
         Add(1, 0, 1, "PlayerOneWin", "Played");

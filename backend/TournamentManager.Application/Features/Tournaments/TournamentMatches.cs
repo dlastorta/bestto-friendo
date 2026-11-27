@@ -19,7 +19,7 @@ public interface ITournamentMatches
 }
 
 public sealed class TournamentMatchesHandler(ICurrentAccount current, IPlayerProfiles profiles,
-    ITournamentDrafts tournaments, ITournamentRegistrations registrations, ITournamentMatches matches)
+    ITournamentDrafts tournaments, ITournamentRegistrations registrations, ITournamentMatches matches, ITournamentByes byes)
 {
     private async Task<Tournament?> OwnedAsync(Guid id, CancellationToken ct)
     {
@@ -50,7 +50,8 @@ public sealed class TournamentMatchesHandler(ICurrentAccount current, IPlayerPro
         var participants = await registrations.ListParticipantsAsync(id, ct);
         var existing = await matches.ListAsync(id, ct);
         var match = TournamentMatch.Create(tournament, command.Round, command.PlayerOneId, command.PlayerTwoId,
-            participants.Select(p => p.PlayerId).ToArray(), existing.ToArray(), tournament.OrganizerPlayerId, DateTimeOffset.UtcNow);
+            participants.Select(p => p.PlayerId).ToArray(), existing.ToArray(), tournament.OrganizerPlayerId, DateTimeOffset.UtcNow,
+            (await byes.ListAsync(id, ct)).ToArray());
         await matches.AddAsync(match, ct);
         return ToDto(match, tournament);
     }

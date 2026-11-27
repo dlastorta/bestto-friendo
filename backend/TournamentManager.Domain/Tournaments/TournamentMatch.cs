@@ -16,9 +16,12 @@ public sealed class TournamentMatch
     public MatchResultRevision? CurrentResult => _results.MaxBy(r => r.Number);
 
     public static TournamentMatch Create(Tournament tournament, int round, Guid one, Guid two,
-        IReadOnlyCollection<Guid> participants, IReadOnlyCollection<TournamentMatch> existing, Guid actor, DateTimeOffset now)
+        IReadOnlyCollection<Guid> participants, IReadOnlyCollection<TournamentMatch> existing, Guid actor, DateTimeOffset now,
+        IReadOnlyCollection<TournamentBye> byes)
     {
         EnsureInProgress(tournament);
+        if (byes.Any(b => b.TournamentId == tournament.Id && b.Round == round && (b.PlayerId == one || b.PlayerId == two)))
+            throw new TournamentConflictException("Un jugador ya tiene un bye en esa ronda.");
         if (round < 1) throw new TournamentRuleViolationException("Indicá una ronda mayor que cero.");
         if (one == two || !participants.Contains(one) || !participants.Contains(two))
             throw new TournamentRuleViolationException("Elegí dos jugadores distintos inscriptos en este torneo.");

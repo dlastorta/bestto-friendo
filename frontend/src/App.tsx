@@ -67,7 +67,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 10</span>
+        <span className="milestone">SLICE 11</span>
       </header>
 
       <main className="main-content">
@@ -112,8 +112,8 @@ function App() {
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 11 · Byes</h2>
-            <p>Asignar byes según la política histórica del torneo.</p>
+            <h2>Slice 12 · Emparejamientos suizos</h2>
+            <p>Generar rondas respetando rivales y restricciones de bye.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>

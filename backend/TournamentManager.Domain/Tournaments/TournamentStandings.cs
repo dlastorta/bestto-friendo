@@ -5,12 +5,18 @@ public sealed record Standing(Guid PlayerId, int Position, decimal Points, IRead
 public static class TournamentStandings
 {
     public static IReadOnlyList<Standing> Calculate(IEnumerable<Guid> participants, IEnumerable<TournamentMatch> matches,
-        FrozenTournamentRules rules)
+        FrozenTournamentRules rules, IEnumerable<TournamentBye>? byes = null)
     {
         var totals = participants.Distinct().ToDictionary(id => id, _ => 0m);
         if (rules.TieBreakerFormulaVersion is not (0 or 1))
             throw new TournamentRuleViolationException("Versión de desempates no soportada.");
         var all = matches.Where(m => m.TournamentId == rules.TournamentId).ToArray();
+        foreach (var bye in (byes ?? []).Where(b => b.TournamentId == rules.TournamentId))
+        {
+            if (rules.ByePolicyVersion != 1)
+                throw new TournamentRuleViolationException("Política histórica de bye no soportada.");
+            totals[bye.PlayerId] += rules.ByePoints;
+        }
         foreach (var match in all)
         {
             if (match.CurrentResult is not { } result) continue;

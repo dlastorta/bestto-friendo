@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 10: Desempates versionados
+## Estado — Slice 11: Byes manuales
 
 Implementado en código:
 
@@ -137,3 +137,7 @@ Si ya descargaste una versión anterior del ZIP, podés aplicar el cambio en tu 
 El Slice 09 agrega la tabla por puntos, privada para organizador propietario e inscriptos, con puestos compartidos y recarga desde resultados vigentes. No requiere migración. Ver [contratos y verificaciones](docs/slices/09-TABLA.md).
 
 Slice 10 aplica Buchholz, OMW% y descarte en orden, con comparaciones exactas y exclusión de forfeits. Aplicar AddTieBreakerFormulaVersion; torneos ya iniciados conservan solo puntos. Ver [reglas y pruebas](docs/slices/10-DESEMPATES.md).
+
+## Slice 11 — Byes
+
+El organizador puede asignar byes manuales en torneos iniciados con la política nueva: inscriptos impares, máximo uno por ronda y jugador, sin partida en esa ronda. Se muestran puntos históricos y auditoría. Tabla y desempates incorporan la política confirmada sin rival ficticio. Los torneos anteriores conservan su comportamiento. Ver [contratos y verificaciones](docs/slices/11-BYES.md).

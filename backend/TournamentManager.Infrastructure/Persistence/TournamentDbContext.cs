@@ -19,10 +19,19 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
     public DbSet<TournamentRegistration> Registrations => Set<TournamentRegistration>();
     public DbSet<TournamentMatch> Matches => Set<TournamentMatch>();
     public DbSet<TournamentBye> Byes => Set<TournamentBye>();
+    public DbSet<SwissRound> SwissRounds => Set<SwissRound>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var round = modelBuilder.Entity<SwissRound>();
+        round.ToTable("swiss_rounds");
+        round.HasKey(r => new { r.TournamentId, r.Number });
+        round.Property(r => r.Number).ValueGeneratedNever();
+        round.Ignore(r => r.ParticipantOrder);
+        round.Property<Guid[]>("_participantOrder").HasColumnName("participant_order").HasColumnType("uuid[]").IsRequired();
+        round.HasOne<Tournament>().WithMany().HasForeignKey(r => r.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        round.HasOne<Player>().WithMany().HasForeignKey(r => r.ActorPlayerId).OnDelete(DeleteBehavior.Restrict);
         var bye = modelBuilder.Entity<TournamentBye>();
         bye.ToTable("tournament_byes");
         bye.HasKey(b => b.Id);
@@ -70,6 +79,7 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         frozen.Property<string[]>("_tieBreakers").HasColumnName("tie_breakers").HasColumnType("text[]").IsRequired();
         tournament.Property(item => item.RulesVersion).IsConcurrencyToken();
         tournament.Property(item => item.MatchesVersion).IsConcurrencyToken();
+        tournament.Property(item => item.ResultsVersion).IsConcurrencyToken();
         tournament.Property(item => item.ParticipationVersion).IsConcurrencyToken();
         tournament.Property(item => item.RegistrationToken).IsConcurrencyToken();
         tournament.HasIndex(item => item.RegistrationToken).IsUnique();

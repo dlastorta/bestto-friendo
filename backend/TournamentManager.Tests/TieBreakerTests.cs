@@ -11,6 +11,7 @@ public sealed class TieBreakerTests
         var t = Tournament.CreateDraft(Guid.NewGuid(), Guid.NewGuid(), "Cadena");
         t.ConfigureRules(3, 1, 0, true, 3, ["Buchholz", "OMWPercentage"], 0);
         t.Start(4, 4, 1, 0, DateTimeOffset.UtcNow);
+        HistoricalTournamentFixture.UseManualPairing(t);
         Guid[] p = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
         var matches = new List<TournamentMatch>();
         foreach (var (round, one, two) in new[] { (1, 0, 1), (1, 2, 3), (2, 1, 2) })
@@ -31,6 +32,7 @@ public sealed class TieBreakerTests
         var t = Tournament.CreateDraft(Guid.NewGuid(), Guid.NewGuid(), "Desempates");
         t.ConfigureRules(3, 1, 0, true, 3, ["Buchholz", "OMWPercentage", "BuchholzCut"], 0);
         t.Start(4, 4, 1, 0, DateTimeOffset.UtcNow);
+        HistoricalTournamentFixture.UseManualPairing(t);
         Guid[] p = [Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()];
         var matches = new List<TournamentMatch>();
         TournamentMatch Add(int round, int one, int two, string outcome, string kind)

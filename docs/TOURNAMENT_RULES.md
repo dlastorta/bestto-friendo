@@ -125,7 +125,7 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - El orden de los desempates es parte de la configuración congelada del torneo.
 - Los puntos y las estadísticas se derivan de resultados verificables; no son contadores que se puedan modificar manualmente sin auditoría.
 
-**Pendiente:** prioridad automática de candidatos para Slice 12. Las fórmulas, forfeits, pendientes y empates finales quedaron definidos en Slice 10.
+**Confirmado en Slice 12:** prioridad al peor clasificado elegible y sorteo inicial; ver apartado de suizo. Las fórmulas, forfeits, pendientes y empates finales quedaron definidos en Slice 10.
 
 ## 7. Publicación y estadísticas
 
@@ -163,4 +163,10 @@ Torneos ya iniciados conservan versión 0 (solo puntos); nuevos inicios capturan
 
 ## Byes — Slice 11 (confirmado)
 
-Asignación manual del organizador propietario en torneo en curso con byes habilitados; solo inscriptos sin partida en esa ronda ni bye previo. Máximo uno por ronda y por jugador en el torneo, exclusivamente con cantidad impar de inscriptos. Otorga puntos congelados sin rival ficticio ni contribución a MWP o lista de rivales de Buchholz/OMW%; sus puntos sí integran el total del jugador usado por sus rivales en Buchholz. Actor y fecha inmutables, sin edición/cancelación. Nuevos inicios congelan ByePolicyVersion=1; torneos ya iniciados conservan versión 0 sin asignación. Elección automática pendiente de Slice 12. Ver [contratos](slices/11-BYES.md).
+Asignación manual del organizador propietario en torneo en curso con byes habilitados; solo inscriptos sin partida en esa ronda ni bye previo. Máximo uno por ronda y por jugador en el torneo, exclusivamente con cantidad impar de inscriptos. Otorga puntos congelados sin rival ficticio ni contribución a MWP o lista de rivales de Buchholz/OMW%; sus puntos sí integran el total del jugador usado por sus rivales en Buchholz. Actor y fecha inmutables, sin edición/cancelación. Nuevos inicios congelan ByePolicyVersion=1; torneos ya iniciados conservan versión 0 sin asignación. Elección automática definida en Slice 12. Ver [contratos](slices/11-BYES.md).
+
+## Suizo — Slice 12 (confirmado)
+
+Primera ronda al azar, incluido el bye si hay cantidad impar; conservar orden sorteado. Desde la segunda, ordenar por puntos y cadena de resistencia histórica y armar desde abajo hacia arriba, prefiriendo rivales cercanos sin repetir ningún enfrentamiento, incluidos forfeits. Bye al peor clasificado sin bye previo que permita completar los cruces; probar siguientes elegibles si hace falta. Explorar alternativas en lugar de aceptar revanchas. Si no hay solución, error sin guardado parcial.
+
+No comenzar una ronda sin completar asignaciones y resultados de todas las anteriores. Generar la siguiente ronda completa sin sobrescribir rondas manuales. Los nuevos torneos también respetan avance y no revancha en creación manual; los históricos conservan modalidad anterior. Correcciones no regeneran cruces existentes. PairingAlgorithmVersion=1 para nuevos inicios, 0 para históricos. Ver [detalles y límites técnicos](slices/12-SUIZO.md).

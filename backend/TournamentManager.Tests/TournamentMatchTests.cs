@@ -10,6 +10,7 @@ public sealed class TournamentMatchTests
         var t = Tournament.CreateDraft(Guid.NewGuid(), Guid.NewGuid(), "Torneo");
         t.ConfigureRules(5.5m, 2, 0.5m, true, 3, [], 0);
         t.Start(2, 2, 1, 0, DateTimeOffset.UtcNow);
+        HistoricalTournamentFixture.UseManualPairing(t);
         return t;
     }
 

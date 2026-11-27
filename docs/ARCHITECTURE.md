@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 11 (byes manuales con política histórica). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 12 (rondas suizas versionadas). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -144,3 +144,7 @@ Domain calcula criterios con fracciones BigInteger normalizadas y comparación e
 ## Slice 11
 
 TournamentBye representa una asignación inmutable sin rival ni resultado de partida. ITournamentByes persiste asignaciones; el token MatchesVersion coordina atómicamente bye y partida. Índices únicos por torneo/ronda y torneo/jugador. FrozenTournamentRules incorpora ByePolicyVersion (0 históricos, 1 nuevos inicios). Tabla suma puntos antes de calcular desempates, sin incluir el bye en enfrentamientos. React consume datos sin duplicar cálculos. Ver [detalle](slices/11-BYES.md).
+
+## Slice 12
+
+SwissRound calcula pares y bye en Domain y conserva orden, actor, fecha y versiones fuente. RoundProgress valida avance completo. ISwissRounds confirma toda la ronda en Infrastructure con un SaveChanges transaccional. ResultsVersion y MatchesVersion protegen generación frente a cargas/correcciones y asignaciones concurrentes. PairingAlgorithmVersion congela política para nuevos inicios y preserva manuales históricos. El sorteo inicial usa aleatoriedad del servidor; Domain recibe el orden para pruebas reproducibles. React confirma y presenta sin duplicar reglas. Ver [detalle](slices/12-SUIZO.md).

@@ -7,6 +7,7 @@ import { TournamentParticipants } from './Registrations'
 import { TournamentStart } from './TournamentStart'
 import { TournamentMatches } from './TournamentMatches'
 import { TournamentByes } from './TournamentByes'
+import { SwissRounds } from './SwissRounds'
 import { Standings } from './Standings'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
@@ -100,6 +101,7 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
           <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
           {selected.status === 'InProgress' && <TournamentMatches key={`matches-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
           {selected.status === 'InProgress' && <TournamentByes key={`byes-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status === 'InProgress' && <SwissRounds key={`rounds-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
           {selected.status === 'InProgress' && <Standings key={`standings-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
         </article>}
       </div>

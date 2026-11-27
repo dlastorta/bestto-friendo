@@ -407,6 +407,9 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<int>("MaximumByesPerParticipant")
                         .HasColumnType("integer");
 
+                    b.Property<int>("PairingAlgorithmVersion")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SourceVersion")
                         .HasColumnType("integer");
 
@@ -461,6 +464,41 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.ToTable("match_result_revisions", (string)null);
                 });
 
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.SwissRound", b =>
+                {
+                    b.Property<Guid>("TournamentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ActorPlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AlgorithmVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SourceMatchesVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SourceResultsVersion")
+                        .HasColumnType("integer");
+
+                    b.PrimitiveCollection<Guid[]>("_participantOrder")
+                        .IsRequired()
+                        .HasColumnType("uuid[]")
+                        .HasColumnName("participant_order");
+
+                    b.HasKey("TournamentId", "Number");
+
+                    b.HasIndex("ActorPlayerId");
+
+                    b.ToTable("swiss_rounds", (string)null);
+                });
+
             modelBuilder.Entity("TournamentManager.Domain.Tournaments.Tournament", b =>
                 {
                     b.Property<Guid>("Id")
@@ -488,6 +526,10 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("RegistrationToken")
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("ResultsVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
 
                     b.Property<int>("RulesVersion")
                         .IsConcurrencyToken()
@@ -801,6 +843,21 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.HasOne("TournamentManager.Domain.Tournaments.TournamentMatch", null)
                         .WithMany("Results")
                         .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TournamentManager.Domain.Tournaments.SwissRound", b =>
+                {
+                    b.HasOne("TournamentManager.Domain.Players.Player", null)
+                        .WithMany()
+                        .HasForeignKey("ActorPlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TournamentManager.Domain.Tournaments.Tournament", null)
+                        .WithMany()
+                        .HasForeignKey("TournamentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

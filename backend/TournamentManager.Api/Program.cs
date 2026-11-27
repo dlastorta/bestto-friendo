@@ -26,6 +26,7 @@ builder.Services.AddScoped<TournamentDraftsHandler>();
 builder.Services.AddScoped<TournamentRegistrationsHandler>();
 builder.Services.AddScoped<TournamentMatchesHandler>();
 builder.Services.AddScoped<TournamentByesHandler>();
+builder.Services.AddScoped<SwissRoundsHandler>();
 builder.Services.AddScoped<StandingsHandler>();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
@@ -104,6 +105,7 @@ app.MapTournamentEndpoints();
 app.MapRegistrationEndpoints();
 app.MapMatchEndpoints();
 app.MapByeEndpoints();
+app.MapSwissRoundEndpoints();
 app.MapGet("/api/tournaments/{id:guid}/standings", async (Guid id, StandingsHandler handler, CancellationToken ct) =>
 {
     var result = await handler.GetAsync(id, ct);

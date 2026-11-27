@@ -22,6 +22,8 @@ public sealed class TournamentBye
             throw new TournamentRuleViolationException("Los byes están deshabilitados en las reglas históricas.");
         if (round < 1 || !participants.Contains(player))
             throw new TournamentRuleViolationException("Indicá una ronda positiva y un jugador inscripto.");
+        if (rules.PairingAlgorithmVersion == 1)
+            RoundProgress.EnsureCanAssign(round, participants, matches, byes);
         if (participants.Distinct().Count() % 2 == 0)
             throw new TournamentRuleViolationException("El bye requiere una cantidad impar de inscriptos.");
         var existing = byes.Where(b => b.TournamentId == tournament.Id).ToArray();

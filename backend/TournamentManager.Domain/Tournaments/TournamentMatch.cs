@@ -20,6 +20,13 @@ public sealed class TournamentMatch
         IReadOnlyCollection<TournamentBye> byes)
     {
         EnsureInProgress(tournament);
+        if (tournament.StartedRules!.PairingAlgorithmVersion == 1)
+        {
+            RoundProgress.EnsureCanAssign(round, participants, existing, byes);
+            if (existing.Any(m => m.TournamentId == tournament.Id &&
+                ((m.PlayerOneId == one && m.PlayerTwoId == two) || (m.PlayerOneId == two && m.PlayerTwoId == one))))
+                throw new TournamentConflictException("Estos jugadores ya se enfrentaron en el torneo.");
+        }
         if (byes.Any(b => b.TournamentId == tournament.Id && b.Round == round && (b.PlayerId == one || b.PlayerId == two)))
             throw new TournamentConflictException("Un jugador ya tiene un bye en esa ronda.");
         if (round < 1) throw new TournamentRuleViolationException("Indicá una ronda mayor que cero.");
@@ -47,6 +54,7 @@ public sealed class TournamentMatch
         if (note.Length > 500 || (Version > 0 && note.Length == 0))
             throw new TournamentRuleViolationException("Para corregir indicá un motivo de entre 1 y 500 caracteres.");
         Version++;
+        tournament.RecordResultChange();
         _results.Add(new(Id, Version, outcome, kind, note.Length == 0 ? "Carga inicial" : note, actor, now));
     }
 

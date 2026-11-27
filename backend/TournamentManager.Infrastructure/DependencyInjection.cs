@@ -52,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped<ITournamentRegistrations, EfTournamentRegistrations>();
         services.AddScoped<ITournamentMatches, EfTournamentMatches>();
         services.AddScoped<ITournamentByes, EfTournamentByes>();
+        services.AddScoped<ISwissRounds, EfSwissRounds>();
 
         return services;
     }

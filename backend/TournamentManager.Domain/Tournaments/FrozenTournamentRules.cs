@@ -9,6 +9,7 @@ public sealed class FrozenTournamentRules
     public int SourceVersion { get; private set; }
     public int TieBreakerFormulaVersion { get; private set; }
     public int ByePolicyVersion { get; private set; }
+    public int PairingAlgorithmVersion { get; private set; }
     public decimal WinPoints { get; private set; }
     public decimal DrawPoints { get; private set; }
     public decimal LossPoints { get; private set; }
@@ -19,7 +20,7 @@ public sealed class FrozenTournamentRules
 
     internal static FrozenTournamentRules Capture(Guid id, TournamentRules rules, int version) => new()
     {
-        TournamentId = id, SourceVersion = version, TieBreakerFormulaVersion = 1, ByePolicyVersion = 1, WinPoints = rules.WinPoints, DrawPoints = rules.DrawPoints,
+        TournamentId = id, SourceVersion = version, TieBreakerFormulaVersion = 1, ByePolicyVersion = 1, PairingAlgorithmVersion = 1, WinPoints = rules.WinPoints, DrawPoints = rules.DrawPoints,
         LossPoints = rules.LossPoints, ByePoints = rules.ByePoints, ByesEnabled = rules.ByesEnabled,
         MaximumByesPerParticipant = TournamentRules.MaximumByesPerParticipant, _tieBreakers = rules.TieBreakers.ToArray()
     };

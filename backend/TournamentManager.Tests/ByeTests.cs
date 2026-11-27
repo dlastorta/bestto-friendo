@@ -10,6 +10,7 @@ public sealed class ByeTests
         var t = Tournament.CreateDraft(Guid.NewGuid(), Guid.NewGuid(), "Byes");
         t.ConfigureRules(3, 1, 0, enabled, 2.5m, ["Buchholz", "OMWPercentage", "BuchholzCut"], 0);
         t.Start(3, 3, 1, 0, DateTimeOffset.UtcNow);
+        HistoricalTournamentFixture.UseManualPairing(t);
         return t;
     }
 

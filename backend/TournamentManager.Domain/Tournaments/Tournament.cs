@@ -16,6 +16,9 @@ public sealed class Tournament
     public DateTimeOffset? StartedAt { get; private set; }
     public FrozenTournamentRules? StartedRules { get; private set; }
     public int MatchesVersion { get; private set; }
+    public int ResultsVersion { get; private set; }
+
+    internal void RecordResultChange() => ResultsVersion++;
 
     public void RecordMatchCreation()
     {

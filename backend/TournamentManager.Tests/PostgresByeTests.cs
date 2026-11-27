@@ -16,7 +16,8 @@ namespace TournamentManager.Tests;
 
 public sealed class PostgresByeTests
 {
-    private static async Task<(Guid Id, Guid[] Players)> Seed(WebApplicationFactory<Program> factory, HttpClient owner, HttpClient player)
+    internal static async Task<(Guid Id, Guid[] Players)> Seed(WebApplicationFactory<Program> factory, HttpClient owner, HttpClient player,
+        bool historicalManual = true)
     {
         var seed = await PostgresTournamentStartTests.Seed(factory, owner, player);
         using var third = factory.CreateClient();
@@ -33,6 +34,8 @@ public sealed class PostgresByeTests
         reg.Present(t, deck, 1, DateTimeOffset.UtcNow);
         await s.GetRequiredService<ITournamentRegistrations>().AddAsync(reg, default);
         t.Start(3, 3, t.RulesVersion, t.ParticipationVersion, DateTimeOffset.UtcNow);
+        if (historicalManual)
+            s.GetRequiredService<TournamentDbContext>().Entry(t.StartedRules!).Property(r => r.PairingAlgorithmVersion).CurrentValue = 0;
         await drafts.SaveAsync(t, default);
         return (t.Id, [seed.OwnerId, seed.PlayerId, thirdId]);
     }

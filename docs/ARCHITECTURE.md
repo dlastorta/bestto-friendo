@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 09 (tabla básica). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 10 (desempates versionados). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -136,3 +136,7 @@ Ver [contratos, asignación administrativa y verificación](slices/04-TORNEOS.md
 ## Implementación en Slice 09
 
 TournamentStandings calcula puntos y puestos compartidos en Domain. StandingsHandler autoriza organizador propietario con rol vigente o inscripción propia antes de consultar datos. Reutiliza puertos existentes y StartedRules; no persiste acumulados ni modifica el esquema. React muestra la respuesta sin calcular puntuación y retira la tabla antes de recargar. GET /api/tournaments/{id}/standings exige sesión y devuelve no-store. No concede acceso a partidas administrativas ni listas de otros jugadores.
+
+## Slice 10
+
+Domain calcula criterios con fracciones BigInteger normalizadas y comparación exacta. FrozenTournamentRules conserva TieBreakerFormulaVersion: migración 0 para histórico, Capture 1 para nuevos inicios. Application entrega valores aproximados y fracciones exactas, React solo presenta. No nuevas dependencias ni EF fuera de Infrastructure. Ver [detalle](slices/10-DESEMPATES.md).

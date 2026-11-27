@@ -2,7 +2,7 @@
 
 Organizador de torneos multijuego, desarrollado por **Vertical Slices** en un monorepo con separación estricta entre **Domain, Application, Infrastructure y API**. El roadmap aprobado contempla biblioteca personal de mazos, snapshot al inscribirse, suizo, desempates ordenados, publicación y metajuego, pero se implementa una funcionalidad por vez.
 
-## Estado — Slice 09: Tabla básica
+## Estado — Slice 10: Desempates versionados
 
 Implementado en código:
 
@@ -126,7 +126,7 @@ En este equipo, Windows Smart App Control bloquea la DLL de dominio en los tests
 
 ## Siguiente slice
 
-**10 — Cadena de desempates:** requiere confirmar fórmulas y políticas pendientes antes de implementarlas.
+**11 — Byes:** definir política de asignación y efecto histórico en desempates antes de implementar.
 
 ### Política de seguridad de dependencias
 
@@ -135,3 +135,5 @@ La auditoría NuGet está habilitada para paquetes directos y transitivos. Los a
 Si ya descargaste una versión anterior del ZIP, podés aplicar el cambio en tu copia local actualizando `Microsoft.OpenApi`, la herramienta `dotnet-ef` y las propiedades de `Directory.Build.props` como se documenta en el commit de seguridad. No es necesario volver a aplicar las migraciones por estos cambios.
 
 El Slice 09 agrega la tabla por puntos, privada para organizador propietario e inscriptos, con puestos compartidos y recarga desde resultados vigentes. No requiere migración. Ver [contratos y verificaciones](docs/slices/09-TABLA.md).
+
+Slice 10 aplica Buchholz, OMW% y descarte en orden, con comparaciones exactas y exclusión de forfeits. Aplicar AddTieBreakerFormulaVersion; torneos ya iniciados conservan solo puntos. Ver [reglas y pruebas](docs/slices/10-DESEMPATES.md).

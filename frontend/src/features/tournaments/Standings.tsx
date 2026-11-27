@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AuthenticationError } from '../identity/api'
 import { tournamentRequest, TournamentPermissionError } from './api'
 
-type Row = { playerId: string; displayName: string; position: number; points: number }
+type Row = { playerId: string; displayName: string; position: number; points: number; formulaVersion?: number; tieBreakers?: { code: string; value: number; numerator: string; denominator: string }[] }
 export function Standings({ tournamentId, onAccessLost }: { tournamentId: string; onAccessLost: () => void }) {
   const [rows, setRows] = useState<Row[] | null>(null)
   const [error, setError] = useState('')
@@ -23,12 +23,13 @@ export function Standings({ tournamentId, onAccessLost }: { tournamentId: string
   }
   return <section aria-label="Tabla de posiciones">
     <h4>Tabla de posiciones</h4>
-    <p>Solo por puntos. Los empates comparten puesto; los criterios de desempate todavía no se aplican.</p>
+    <p>Primero puntos, luego los desempates congelados en su orden. Si persiste la igualdad, se comparte puesto.</p>
     <button disabled={busy} onClick={() => void refresh()}>{busy ? 'Consultando tabla…' : 'Consultar tabla'}</button>
     {error && <p role="alert">{error}</p>}
     {rows && <table><caption>Puntos según resultados vigentes. Recargá después de corregir resultados.</caption>
-      <thead><tr><th scope="col">Puesto</th><th scope="col">Jugador</th><th scope="col">Puntos</th></tr></thead>
-      <tbody>{rows.map(row => <tr key={row.playerId}><td>{row.position}</td><th scope="row">{row.displayName}</th><td>{row.points}</td></tr>)}</tbody>
+      <thead><tr><th scope="col">Puesto</th><th scope="col">Jugador</th><th scope="col">Puntos</th>{rows[0]?.tieBreakers?.map(t => <th key={t.code} scope="col">{t.code === 'OMWPercentage' ? 'OMW%' : t.code === 'BuchholzCut' ? 'Buchholz con descarte' : t.code}</th>)}</tr></thead>
+      <tbody>{rows.map(row => <tr key={row.playerId}><td>{row.position}</td><th scope="row">{row.displayName}</th><td>{row.points}</td>{row.tieBreakers?.map(t => <td key={t.code} title={`Valor exacto: ${t.numerator}/${t.denominator}`}>{t.code === 'OMWPercentage' ? `${(t.value * 100).toFixed(2)}%` : t.value}</td>)}</tr>)}</tbody>
     </table>}
+    {rows && <p>{rows[0]?.formulaVersion === 0 ? 'Torneo histórico: clasificación solo por puntos, sin aplicar nuevas fórmulas.' : 'Valores mostrados redondeados; puestos calculados con valores exactos. Forfeits y pendientes excluidos de los enfrentamientos de desempate.'}</p>}
   </section>
 }

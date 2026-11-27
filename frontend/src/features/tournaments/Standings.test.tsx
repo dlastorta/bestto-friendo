@@ -27,3 +27,23 @@ it.each([401, 403])('retira tabla y notifica pérdida de acceso con %s', async s
   await waitFor(() => expect(lost).toHaveBeenCalledOnce())
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
 })
+
+it('muestra criterios en orden y distingue torneos históricos', async () => {
+  let historical = false
+  vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => [{
+    playerId: 'a', displayName: 'Ana', position: 1, points: 3, formulaVersion: historical ? 0 : 1,
+    tieBreakers: historical ? [] : [
+      { code: 'OMWPercentage', value: 0.333333, numerator: '1', denominator: '3' },
+      { code: 'BuchholzCut', value: 2, numerator: '2', denominator: '1' },
+    ],
+  }] })))
+  render(<Standings tournamentId="cup" onAccessLost={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Consultar tabla' }))
+  await screen.findByRole('table')
+  expect(screen.getAllByRole('columnheader').map(h => h.textContent)).toEqual(['Puesto', 'Jugador', 'Puntos', 'OMW%', 'Buchholz con descarte'])
+  expect(screen.getByText('33.33%')).toHaveAttribute('title', 'Valor exacto: 1/3')
+  historical = true
+  fireEvent.click(screen.getByRole('button', { name: 'Consultar tabla' }))
+  expect(await screen.findByText(/Torneo histórico/)).toBeInTheDocument()
+  expect(screen.queryByRole('columnheader', { name: 'OMW%' })).not.toBeInTheDocument()
+})

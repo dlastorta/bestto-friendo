@@ -11,7 +11,7 @@ internal sealed class EfTournamentRegistrations(TournamentDbContext db) : ITourn
     public Task<Tournament?> FindByTokenAsync(Guid token, CancellationToken ct) =>
         db.Tournaments.SingleOrDefaultAsync(t => t.RegistrationToken == token, ct);
     public Task<Tournament?> FindForPlayerAsync(Guid tournamentId, Guid playerId, CancellationToken ct) =>
-        db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId && db.Registrations.Any(r => r.TournamentId == t.Id && r.PlayerId == playerId), ct);
+        db.Tournaments.Include(t => t.StartedRules).SingleOrDefaultAsync(t => t.Id == tournamentId && db.Registrations.Any(r => r.TournamentId == t.Id && r.PlayerId == playerId), ct);
     public Task<TournamentRegistration?> FindAsync(Guid tournamentId, Guid playerId, CancellationToken ct) =>
         db.Registrations.Include(r => r.Snapshots).SingleOrDefaultAsync(r => r.TournamentId == tournamentId && r.PlayerId == playerId, ct);
     public async Task<IReadOnlyList<MyRegistration>> ListMineAsync(Guid playerId, CancellationToken ct) =>

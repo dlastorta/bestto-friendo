@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 08 (partidas manuales y resultados). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 09 (tabla básica). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -132,3 +132,7 @@ Invitados, formatos avanzados, clasificación/desempates, asignación de byes, e
 - Perfil HTTP incorpora `canOrganizeTournaments`. React muestra creación/listado/detalle solo con ese permiso y elimina borradores visibles ante `401` o `403`, reconsultando la sesión. Los componentes privados tienen claves distintas por feature y jugador para desmontarlos correctamente.
 
 Ver [contratos, asignación administrativa y verificación](slices/04-TORNEOS.md).
+
+## Implementación en Slice 09
+
+TournamentStandings calcula puntos y puestos compartidos en Domain. StandingsHandler autoriza organizador propietario con rol vigente o inscripción propia antes de consultar datos. Reutiliza puertos existentes y StartedRules; no persiste acumulados ni modifica el esquema. React muestra la respuesta sin calcular puntuación y retira la tabla antes de recargar. GET /api/tournaments/{id}/standings exige sesión y devuelve no-store. No concede acceso a partidas administrativas ni listas de otros jugadores.

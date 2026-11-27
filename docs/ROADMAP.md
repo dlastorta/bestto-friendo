@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–07 integrados; Slice 08 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-26.
+Estado: Slices 01–08 integrados; Slice 09 implementado y verificado, pendiente de revisión. Actualizado el 2026-11-27.
 
 ## Objetivo
 
@@ -103,3 +103,5 @@ Los módulos financieros son independientes de clasificación, emparejamiento y 
 - **Slice 06:** inscripción por enlace sin mazo inicial, presentación posterior de snapshot privado y estado visible al organizador. Ver [`slices/06-INSCRIPCIONES.md`](slices/06-INSCRIPCIONES.md).
 - **Slice 07:** inicio, reglas históricas autónomas y sustitución auditada privada antes del inicio. Ver [`slices/07-INICIO.md`](slices/07-INICIO.md).
 - **Slice 08:** partidas manuales por ronda, resultados y correcciones auditadas con puntos históricos. Ver [`slices/08-PARTIDAS.md`](slices/08-PARTIDAS.md).
+
+- **Slice 09:** tabla por puntos para organizador e inscriptos, puestos compartidos y reconstrucción desde resultados vigentes. Ver [contratos](slices/09-TABLA.md).

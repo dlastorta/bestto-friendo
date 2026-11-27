@@ -6,6 +6,7 @@ import { TournamentRulesEditor } from './TournamentRulesEditor'
 import { TournamentParticipants } from './Registrations'
 import { TournamentStart } from './TournamentStart'
 import { TournamentMatches } from './TournamentMatches'
+import { Standings } from './Standings'
 
 export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void }) {
   const [games, setGames] = useState<Game[]>([])
@@ -97,6 +98,7 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
           <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}-${selected.status}`} tournament={{ ...selected, rules: selected.startedRules ?? selected.rules }} onSaved={setSelected} onAccessLost={onAccessLost} />
           <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
           {selected.status === 'InProgress' && <TournamentMatches key={`matches-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
+          {selected.status === 'InProgress' && <Standings key={`standings-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
         </article>}
       </div>
     </div>

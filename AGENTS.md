@@ -9,11 +9,11 @@ Este archivo contiene las instrucciones de trabajo para asistentes y colaborador
 3. `docs/ARCHITECTURE.md` describe las convenciones técnicas vigentes.
 4. Ante discrepancias, detener cambios de reglas y explicitar la contradicción antes de implementar.
 
-## Slice actual: 08 — Partidas manuales y resultados
+## Slice actual: 09 — Tabla básica
 
-**Permitido:** mantener slices anteriores; el organizador propietario crea partidas por ronda en torneos en curso y carga/corrige resultados. Dos jugadores distintos inscriptos, una partida por jugador y ronda. Victoria/derrota o empate; forfeit con ganador y puntos normales. Correcciones con motivo e historial de actor/fecha. Puntos derivados exclusivamente de `StartedRules`. Ver `docs/slices/08-PARTIDAS.md`.
+**Permitido:** tabla por puntos para organizador propietario con rol vigente y jugadores inscriptos; puestos compartidos (1, 1, 3), sin desempates. Reconstruir desde resultados vigentes y StartedRules, sin totales persistidos ni listas de mazos. Ver `docs/slices/09-TABLA.md`. Mantener slices anteriores; el organizador propietario crea partidas por ronda en torneos en curso y carga/corrige resultados. Dos jugadores distintos inscriptos, una partida por jugador y ronda. Victoria/derrota o empate; forfeit con ganador y puntos normales. Correcciones con motivo e historial de actor/fecha. Puntos derivados exclusivamente de `StartedRules`. Ver `docs/slices/08-PARTIDAS.md`.
 
-**No permitido en Slice 08:** emparejamiento automático, asignación de byes, clasificación/desempates, publicación/finalización/eliminación de torneos, cambio de reglas históricas, edición de contendientes o borrado de partidas/resultados, conciliación de invitados, Elo, legalidad/importación de cartas. Google y Swagger UI quedan para después. Nunca exponer listas de mazos desde partidas.
+**No permitido en Slice 09:** emparejamiento automático, asignación de byes, desempates, publicación/finalización/eliminación de torneos, cambio de reglas históricas, edición de contendientes o borrado de partidas/resultados, conciliación de invitados, Elo, legalidad/importación de cartas. Google y Swagger UI quedan para después. Nunca exponer listas de mazos desde partidas.
 
 **Seguridad temporal:** crear juegos requiere `CatalogAdmin`; administrar torneos requiere `TournamentOrganizer`. Inscripción por enlace y presentación propia requieren sesión, sin rol administrativo. Perfil, biblioteca, inscripciones y snapshots se determinan por la cuenta autenticada, sin privilegios sobre listas ajenas. Roles revalidados por petición; escrituras con CSRF. **No publicar la API en Internet** sin completar recuperación/verificación de email y revisar configuración HTTPS, claves de cookies y operación de cuentas.
 
@@ -75,11 +75,11 @@ Dependencias permitidas: `Api -> Application`, `Api -> Infrastructure` (composit
 - Registrar cambios de alcance conscientemente; ninguna decisión pendiente se da por resuelta por accidente.
 - Si no están instalados SDKs, Docker o paquetes, reportar con precisión qué verificaciones no se pudieron ejecutar.
 
-## Definition of Done — Slice 08
+## Definition of Done — Slice 09
 
 - Partidas manuales API/React solo para el organizador propietario, en torneo iniciado, con jugadores inscriptos distintos y sin duplicación por ronda.
 - Resultado y correcciones con historial inmutable, actor de sesión, fecha, tipo y motivo; versiones esperadas impiden sobrescrituras.
-- Puntos derivados de reglas históricas y resultado vigente; no almacenar acumulados mutables ni anticipar la tabla del Slice 09.
+- Tabla reconstruida desde reglas históricas y resultados vigentes, incluyendo ceros y puestos compartidos. Acceso solo al organizador propietario con rol vigente o inscriptos; sin acumulados mutables ni listas privadas.
 - Migración versionada, autorización/CSRF, revocación de rol, pruebas puras y concurrencia real PostgreSQL.
 - Conservar las garantías anteriores siguientes.
 

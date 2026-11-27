@@ -18,10 +18,20 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
     public DbSet<Tournament> Tournaments => Set<Tournament>();
     public DbSet<TournamentRegistration> Registrations => Set<TournamentRegistration>();
     public DbSet<TournamentMatch> Matches => Set<TournamentMatch>();
+    public DbSet<TournamentBye> Byes => Set<TournamentBye>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        var bye = modelBuilder.Entity<TournamentBye>();
+        bye.ToTable("tournament_byes");
+        bye.HasKey(b => b.Id);
+        bye.Property(b => b.Id).ValueGeneratedNever();
+        bye.HasIndex(b => new { b.TournamentId, b.Round }).IsUnique();
+        bye.HasIndex(b => new { b.TournamentId, b.PlayerId }).IsUnique();
+        bye.HasOne<Tournament>().WithMany().HasForeignKey(b => b.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        bye.HasOne<Player>().WithMany().HasForeignKey(b => b.PlayerId).OnDelete(DeleteBehavior.Restrict);
+        bye.HasOne<Player>().WithMany().HasForeignKey(b => b.ActorPlayerId).OnDelete(DeleteBehavior.Restrict);
         var match = modelBuilder.Entity<TournamentMatch>();
         match.ToTable("tournament_matches");
         match.HasKey(m => m.Id);

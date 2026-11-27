@@ -18,21 +18,21 @@ public sealed class TournamentMatchTests
     {
         var t = Started(); var one = Guid.NewGuid(); var two = Guid.NewGuid(); Guid[] players = [one, two];
         var now = DateTimeOffset.UtcNow;
-        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 0, one, two, players, [], t.OrganizerPlayerId, now));
-        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 1, one, one, players, [], t.OrganizerPlayerId, now));
-        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 1, one, Guid.NewGuid(), players, [], t.OrganizerPlayerId, now));
-        var m = TournamentMatch.Create(t, 1, one, two, players, [], t.OrganizerPlayerId, now);
-        Assert.Throws<TournamentConflictException>(() => TournamentMatch.Create(t, 1, two, one, players, [m], t.OrganizerPlayerId, now));
-        Assert.Equal(2, TournamentMatch.Create(t, 2, one, two, players, [m], t.OrganizerPlayerId, now).Round);
+        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 0, one, two, players, [], t.OrganizerPlayerId, now, []));
+        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 1, one, one, players, [], t.OrganizerPlayerId, now, []));
+        Assert.Throws<TournamentRuleViolationException>(() => TournamentMatch.Create(t, 1, one, Guid.NewGuid(), players, [], t.OrganizerPlayerId, now, []));
+        var m = TournamentMatch.Create(t, 1, one, two, players, [], t.OrganizerPlayerId, now, []);
+        Assert.Throws<TournamentConflictException>(() => TournamentMatch.Create(t, 1, two, one, players, [m], t.OrganizerPlayerId, now, []));
+        Assert.Equal(2, TournamentMatch.Create(t, 2, one, two, players, [m], t.OrganizerPlayerId, now, []).Round);
         var draft = Tournament.CreateDraft(t.OrganizerPlayerId, t.GameId, "Borrador");
-        Assert.Throws<TournamentConflictException>(() => TournamentMatch.Create(draft, 1, one, two, players, [], t.OrganizerPlayerId, now));
+        Assert.Throws<TournamentConflictException>(() => TournamentMatch.Create(draft, 1, one, two, players, [], t.OrganizerPlayerId, now, []));
     }
 
     [Fact]
     public void CorrectionsKeepHistoryAndRecalculatePointsFromFrozenRules()
     {
         var t = Started(); var one = Guid.NewGuid(); var two = Guid.NewGuid(); var now = DateTimeOffset.UtcNow;
-        var m = TournamentMatch.Create(t, 1, one, two, [one, two], [], t.OrganizerPlayerId, now);
+        var m = TournamentMatch.Create(t, 1, one, two, [one, two], [], t.OrganizerPlayerId, now, []);
         m.RecordResult(t, "PlayerOneWin", "Played", null, 0, t.OrganizerPlayerId, now);
         var original = m.CurrentResult!;
         Assert.Equal((5.5m, 0.5m), original.Points(t.StartedRules!));

@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 10 (desempates versionados). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 11 (byes manuales con política histórica). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -140,3 +140,7 @@ TournamentStandings calcula puntos y puestos compartidos en Domain. StandingsHan
 ## Slice 10
 
 Domain calcula criterios con fracciones BigInteger normalizadas y comparación exacta. FrozenTournamentRules conserva TieBreakerFormulaVersion: migración 0 para histórico, Capture 1 para nuevos inicios. Application entrega valores aproximados y fracciones exactas, React solo presenta. No nuevas dependencias ni EF fuera de Infrastructure. Ver [detalle](slices/10-DESEMPATES.md).
+
+## Slice 11
+
+TournamentBye representa una asignación inmutable sin rival ni resultado de partida. ITournamentByes persiste asignaciones; el token MatchesVersion coordina atómicamente bye y partida. Índices únicos por torneo/ronda y torneo/jugador. FrozenTournamentRules incorpora ByePolicyVersion (0 históricos, 1 nuevos inicios). Tabla suma puntos antes de calcular desempates, sin incluir el bye en enfrentamientos. React consume datos sin duplicar cálculos. Ver [detalle](slices/11-BYES.md).

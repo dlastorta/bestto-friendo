@@ -30,6 +30,6 @@ export function Standings({ tournamentId, onAccessLost }: { tournamentId: string
       <thead><tr><th scope="col">Puesto</th><th scope="col">Jugador</th><th scope="col">Puntos</th>{rows[0]?.tieBreakers?.map(t => <th key={t.code} scope="col">{t.code === 'OMWPercentage' ? 'OMW%' : t.code === 'BuchholzCut' ? 'Buchholz con descarte' : t.code}</th>)}</tr></thead>
       <tbody>{rows.map(row => <tr key={row.playerId}><td>{row.position}</td><th scope="row">{row.displayName}</th><td>{row.points}</td>{row.tieBreakers?.map(t => <td key={t.code} title={`Valor exacto: ${t.numerator}/${t.denominator}`}>{t.code === 'OMWPercentage' ? `${(t.value * 100).toFixed(2)}%` : t.value}</td>)}</tr>)}</tbody>
     </table>}
-    {rows && <p>{rows[0]?.formulaVersion === 0 ? 'Torneo histórico: clasificación solo por puntos, sin aplicar nuevas fórmulas.' : 'Valores mostrados redondeados; puestos calculados con valores exactos. Forfeits y pendientes excluidos de los enfrentamientos de desempate.'}</p>}
+    {rows && <p>{rows[0]?.formulaVersion === 0 ? 'Torneo histórico: clasificación solo por puntos, sin aplicar nuevas fórmulas.' : 'Valores mostrados redondeados; puestos calculados con valores exactos. Byes, forfeits y pendientes excluidos de los enfrentamientos de desempate.'}</p>}
   </section>
 }

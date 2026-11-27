@@ -122,8 +122,8 @@ public sealed class PostgresMatchTests
         }
         else
         {
-            var first = TournamentMatch.Create(ta, 1, seed.OwnerId, seed.PlayerId, [seed.OwnerId, seed.PlayerId], [], seed.OwnerId, DateTimeOffset.UtcNow);
-            var second = TournamentMatch.Create(tb, 1, seed.PlayerId, seed.OwnerId, [seed.OwnerId, seed.PlayerId], [], seed.OwnerId, DateTimeOffset.UtcNow);
+            var first = TournamentMatch.Create(ta, 1, seed.OwnerId, seed.PlayerId, [seed.OwnerId, seed.PlayerId], [], seed.OwnerId, DateTimeOffset.UtcNow, []);
+            var second = TournamentMatch.Create(tb, 1, seed.PlayerId, seed.OwnerId, [seed.OwnerId, seed.PlayerId], [], seed.OwnerId, DateTimeOffset.UtcNow, []);
             await ma.AddAsync(first, default);
             await Assert.ThrowsAsync<TournamentConflictException>(() => mb.AddAsync(second, default));
             Assert.Single((await owner.GetFromJsonAsync<MatchDto[]>(path))!);

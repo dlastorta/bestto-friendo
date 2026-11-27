@@ -80,7 +80,7 @@ export function TournamentRulesEditor({ tournament, onSaved, onAccessLost }: {
         </select>
         <p>Máximo un bye por participante. Si están deshabilitados, su puntaje queda guardado pero no se otorgan byes.</p>
         <h4>Orden de desempates</h4>
-        <p>Se aplicarán en este orden. Las fórmulas se implementarán más adelante; una lista vacía conserva los empates.</p>
+        <p>Se aplican en este orden a torneos iniciados con la nueva versión de fórmulas. Una lista vacía conserva los empates; los torneos históricos mantienen su versión.</p>
         <ol>{order.map((code, index) => {
           const label = criteria.find(item => item.code === code)?.label ?? code
           return <li key={code}><span>{label}</span><div className="rule-actions">

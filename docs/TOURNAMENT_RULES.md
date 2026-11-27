@@ -125,7 +125,7 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - El orden de los desempates es parte de la configuración congelada del torneo.
 - Los puntos y las estadísticas se derivan de resultados verificables; no son contadores que se puedan modificar manualmente sin auditoría.
 
-**Pendiente:** tratamiento exacto de rondas no jugadas, cálculo y mínimos de OMW%, variantes de Buchholz, prioridad precisa de candidatos a bye y resolución final si todos los criterios empatan.
+**Pendiente:** tratamiento de byes y prioridad de candidatos para Slice 11. Las fórmulas, forfeits, pendientes y empates finales quedaron definidos en Slice 10.
 
 ## 7. Publicación y estadísticas
 
@@ -154,3 +154,9 @@ La distinción de principal/secundaria, afiliaciones condicionales y reglas espe
 - Puntos de mayor a menor desde resultados vigentes y reglas históricas; pendientes no suman. Todos los inscriptos aparecen, incluso con cero puntos.
 - Igual puntaje implica igual puesto, con numeración 1, 1, 3. Orden secundario por ID solo estabiliza la presentación, no rompe empates deportivos.
 - Las correcciones se reflejan al consultar nuevamente, sin sumar revisiones anteriores. No aplica desempates, byes ni estadísticas de win rate.
+
+## Desempates — Slice 10 (confirmado)
+
+Buchholz suma puntos actuales de rivales de partidas jugadas; Buchholz con descarte quita una contribución mínima. OMW% promedia la proporción de victorias de cada rival (empate=0,5), con mínimo exacto 1/3 por rival, sin depender de puntos configurables. Forfeits y pendientes no cuentan como enfrentamientos ni en MWP, aunque los puntos de forfeit siguen en los totales de rivales usados por Buchholz. Repeticiones de rival cuentan por encuentro. Sin rivales computables, valor cero. Si persiste igualdad tras toda la cadena, compartir puesto.
+
+Torneos ya iniciados conservan versión 0 (solo puntos); nuevos inicios capturan versión 1. Toda evolución debe preservar semántica histórica. Comparaciones exactas sin desempatar por redondeo. Ver casos, contrato y transición en [Slice 10](slices/10-DESEMPATES.md). Byes requieren decisión específica antes de implementarlos.

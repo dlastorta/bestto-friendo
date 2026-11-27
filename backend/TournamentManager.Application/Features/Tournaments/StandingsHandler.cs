@@ -3,7 +3,9 @@ using TournamentManager.Domain.Tournaments;
 
 namespace TournamentManager.Application.Features.Tournaments;
 
-public sealed record StandingDto(Guid PlayerId, string DisplayName, int Position, decimal Points);
+public sealed record StandingTieBreaker(string Code, decimal Value, string Numerator, string Denominator);
+public sealed record StandingDto(Guid PlayerId, string DisplayName, int Position, decimal Points,
+    int FormulaVersion, IReadOnlyList<StandingTieBreaker> TieBreakers);
 
 public sealed class StandingsHandler(ICurrentAccount current, IPlayerProfiles profiles, ITournamentDrafts tournaments,
     ITournamentRegistrations registrations, ITournamentMatches matches)
@@ -20,6 +22,10 @@ public sealed class StandingsHandler(ICurrentAccount current, IPlayerProfiles pr
         var participants = await registrations.ListParticipantsAsync(id, ct);
         var names = participants.ToDictionary(p => p.PlayerId, p => p.DisplayName);
         return TournamentStandings.Calculate(names.Keys, await matches.ListAsync(id, ct), tournament.StartedRules)
-            .Select(r => new StandingDto(r.PlayerId, names[r.PlayerId], r.Position, r.Points)).ToArray();
+            .Select(r => new StandingDto(r.PlayerId, names[r.PlayerId], r.Position, r.Points,
+                tournament.StartedRules.TieBreakerFormulaVersion,
+                r.TieBreakers.Select((v, i) => new StandingTieBreaker(tournament.StartedRules.TieBreakers[i], v.Rounded(6),
+                    v.Numerator.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    v.Denominator.ToString(System.Globalization.CultureInfo.InvariantCulture))).ToArray())).ToArray();
     }
 }

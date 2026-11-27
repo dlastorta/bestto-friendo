@@ -407,6 +407,9 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<int>("SourceVersion")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TieBreakerFormulaVersion")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("WinPoints")
                         .HasPrecision(9, 2)
                         .HasColumnType("numeric(9,2)");

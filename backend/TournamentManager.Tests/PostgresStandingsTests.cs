@@ -43,7 +43,19 @@ public sealed class PostgresStandingsTests
         (await owner.PostAsJsonAsync(resultPath, new RecordMatchResult("Draw", "Played", "Corrección", 1))).EnsureSuccessStatusCode();
         var shared = (await player.GetFromJsonAsync<StandingDto[]>(path + "/standings"))!;
         Assert.All(shared, r => { Assert.Equal(1, r.Points); Assert.Equal(1, r.Position); });
-        Assert.Equal(shared, (await owner.GetFromJsonAsync<StandingDto[]>(path + "/standings"))!);
+        var ownerTable = (await owner.GetFromJsonAsync<StandingDto[]>(path + "/standings"))!;
+        Assert.Equal(System.Text.Json.JsonSerializer.Serialize(shared), System.Text.Json.JsonSerializer.Serialize(ownerTable));
+        Assert.All(shared, r => Assert.Equal(1, r.FormulaVersion));
+        Assert.Equal(new[] { "Buchholz", "OMWPercentage" }, shared[0].TieBreakers.Select(t => t.Code));
+        using (var scope = factory.Services.CreateScope())
+        {
+            var t = (await scope.ServiceProvider.GetRequiredService<ITournamentDrafts>().FindOwnedAsync(seed.TournamentId, seed.OwnerId, default))!;
+            var db = scope.ServiceProvider.GetRequiredService<TournamentDbContext>();
+            db.Entry(t.StartedRules!).Property(r => r.TieBreakerFormulaVersion).CurrentValue = 0;
+            await db.SaveChangesAsync();
+        }
+        Assert.All((await player.GetFromJsonAsync<StandingDto[]>(path + "/standings"))!, r =>
+        { Assert.Equal(0, r.FormulaVersion); Assert.Empty(r.TieBreakers); Assert.Equal(1, r.Position); });
         var response = await player.GetAsync(path + "/standings");
         Assert.True(response.Headers.CacheControl!.NoStore);
         var json = await response.Content.ReadAsStringAsync();

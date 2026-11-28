@@ -542,6 +542,13 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
 
+                    b.Property<int>("PublicationVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid?>("RegistrationToken")
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
@@ -765,11 +772,21 @@ namespace TournamentManager.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("PublicSnapshotNumber")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset>("RegisteredAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("TournamentId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("VisibilityChangedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("VisibilityVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

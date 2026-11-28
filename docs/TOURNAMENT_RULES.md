@@ -184,3 +184,11 @@ El organizador propietario finaliza tras al menos una ronda y con todas las rond
 Después del cierre, reabrir explícitamente con motivo permite corregir resultados y finalizar otra vez, sin generar/regenerar rondas, partidas ni byes. Cada cierre conserva las versiones exactas de resultados y asignaciones que lo sustentaron; las correcciones no borran cierres previos.
 
 Antes del primer cierre, el organizador puede corregir resultados y pedir explícitamente regenerar solo la última ronda. Recalcular desde las rondas anteriores con reglas congeladas, reemplazar pares y bye y dejar nuevos resultados pendientes. Los resultados/asignaciones reemplazados quedan anulados para los cálculos, conservados en historial. No se regeneran rondas automáticamente. Esta decisión amplía la restricción anterior del Slice 12 sin permitir borrar historial ni editar contendientes directamente.
+
+## Publicación — Slice 14 (confirmado)
+
+Solo el organizador propietario con rol vigente publica/retira un torneo finalizado. La página se consulta sin sesión mediante enlace y muestra nombre del torneo, juego, fechas, nombres visibles de jugadores, clasificación, enfrentamientos, resultados y byes. No expone email, cuenta, tokens de inscripción, fuentes de biblioteca ni motivos administrativos.
+
+La presentación (nombre y lista literal) permanece privada salvo autorización explícita de su jugador. El permiso pertenece a ese snapshot, puede revocarse y no da acceso a la biblioteca o al historial de presentaciones. Reemplazar la presentación exige autorizar nuevamente. El organizador no puede decidir por el jugador. Esta autorización constituye la ampliación explícita de la privacidad del Slice 06.
+
+Reabrir un torneo publicado retira su publicación atómicamente; volver a cerrar exige publicar otra vez. Retirar la publicación o el consentimiento impide nuevas lecturas públicas, sin prometer borrar copias previamente guardadas por terceros. Ver [Slice 14](slices/14-PUBLICACION.md).

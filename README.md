@@ -151,3 +151,9 @@ El organizador genera una ronda completa con confirmación. Primera ronda sortea
 En la vista del torneo, «Revisar cierre» permite confirmar la finalización cuando todas las rondas están completas. «Reabrir para corregir» exige motivo y habilita exclusivamente correcciones de resultados; después se puede finalizar nuevamente, conservando cada cierre.
 
 Antes del primer cierre, «Reemplazar únicamente la última ronda» en rondas suizas requiere motivo y confirmación. Conserva la versión anterior en historial y crea nuevos cruces pendientes a partir de las rondas previas. Nunca modifica rondas automáticamente al corregir. Finalizar no publica ni expone listas privadas. Ver [Slice 13](docs/slices/13-CIERRE.md).
+
+## Slice 14 — Publicar resultados
+
+Después de finalizar, el organizador puede confirmar «Publicar torneo» y compartir el enlace público sin login. «Retirar publicación» lo vuelve inaccesible; reabrir para correcciones también lo retira automáticamente y requiere republicar después del nuevo cierre.
+
+En «Mis inscripciones», cada jugador puede autorizar compartir el nombre y la lista de su presentación, o retirar ese permiso. La biblioteca sigue privada; reemplazar una presentación invalida el permiso anterior. Las listas se muestran literalmente como texto. Ver [contratos y privacidad](docs/slices/14-PUBLICACION.md).

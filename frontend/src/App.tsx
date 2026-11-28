@@ -1,3 +1,4 @@
+import { PublicTournament } from './features/tournaments/PublicTournament'
 import { useCallback, useEffect, useState } from 'react'
 import { fetchHealth, pendingHealth, type HealthCheck } from './features/system/health'
 import { GamesCatalog } from './features/games/GamesCatalog'
@@ -36,7 +37,7 @@ function ServiceCard({ label, description, check, code }: ServiceCardProps) {
   )
 }
 
-function App() {
+function Workspace() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null)
   const [sessionKey, setSessionKey] = useState(0)
   const expireSession = useCallback(() => { setProfile(null); setSessionKey(value => value + 1) }, [])
@@ -67,7 +68,7 @@ function App() {
           <span className="brand-name">Tournament Manager</span>
           <span className="brand-subtitle">Developer workspace</span>
         </div>
-        <span className="milestone">SLICE 13</span>
+        <span className="milestone">SLICE 14</span>
       </header>
 
       <main className="main-content">
@@ -112,8 +113,8 @@ function App() {
         <div className="next-step">
           <span className="next-tag">LO QUE SIGUE</span>
           <div>
-            <h2>Slice 14 · Publicación</h2>
-            <p>Publicar resultados y metadatos permitidos mediante una acción independiente del cierre.</p>
+            <h2>Slice 15 · Taxonomía y metajuego</h2>
+            <p>Clasificar estrategias y consultar representación y rendimiento histórico.</p>
           </div>
           <span className="next-arrow" aria-hidden="true">→</span>
         </div>
@@ -124,4 +125,12 @@ function App() {
   )
 }
 
-export default App
+export default function App() {
+  const [publicId, setPublicId] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get('torneo'))
+  useEffect(() => {
+    const change = () => setPublicId(new URLSearchParams(window.location.hash.slice(1)).get('torneo'))
+    window.addEventListener('hashchange', change)
+    return () => window.removeEventListener('hashchange', change)
+  }, [])
+  return publicId !== null ? <PublicTournament key={publicId} id={publicId} /> : <Workspace />
+}

@@ -1,7 +1,7 @@
 import { AuthenticationError, csrfHeaders } from '../identity/api'
 
 export type TournamentRules = { winPoints: number; drawPoints: number; lossPoints: number; byesEnabled: boolean; byePoints: number; maximumByesPerParticipant: number; tieBreakers: string[] }
-export type Tournament = { id: string; name: string; gameId: string; status: string; rulesVersion: number; rules: TournamentRules | null; participationVersion?: number; startedAt?: string | null; startedRules?: TournamentRules | null; matchesVersion?: number; resultsVersion?: number; lifecycleVersion?: number; finishedAt?: string | null }
+export type Tournament = { id: string; name: string; gameId: string; status: string; rulesVersion: number; rules: TournamentRules | null; participationVersion?: number; startedAt?: string | null; startedRules?: TournamentRules | null; matchesVersion?: number; resultsVersion?: number; lifecycleVersion?: number; finishedAt?: string | null; publishedAt?: string | null; publicationVersion?: number }
 export class TournamentPermissionError extends Error {}
 
 export async function tournamentRequest<T>(path = '', body?: unknown, method = body ? 'POST' : 'GET'): Promise<T> {

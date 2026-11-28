@@ -6,7 +6,7 @@ import { Standings } from './Standings'
 
 type Entry = { tournamentId: string; name: string; gameId: string; hasPresentedDeck: boolean }
 type PresentedDeck = { name: string; listText: string; sourceRevision: number; number: number; reason: string; presentedAt: string }
-type Detail = { tournamentId: string; hasPresentedDeck: boolean; deck: PresentedDeck | null; status: string }
+type Detail = { tournamentId: string; hasPresentedDeck: boolean; deck: PresentedDeck | null; status: string; deckIsPublic: boolean; visibilityVersion: number }
 type Invitation = { tournamentId: string; name: string; gameId: string; status: string }
 
 export async function registrationRequest<T>(path = '', body?: unknown): Promise<T> {
@@ -131,6 +131,16 @@ export function Registrations({ onSessionExpired }: { onSessionExpired: () => vo
             await refresh()
           })}>{selected.deck ? 'Reemplazar presentación' : 'Presentar mazo'}</button>
         </>}
+        {selected.deck && <section aria-label="Visibilidad de mi presentación">
+          <p>{selected.deckIsPublic ? 'Autorizaste publicar esta presentación si el organizador publica el torneo.' : 'Tu presentación es privada. Solo vos podés autorizar su publicación.'}</p>
+          <p>La autorización incluye el nombre del mazo y su lista presentada, sin dar acceso a tu biblioteca. Podés retirarla cuando quieras.</p>
+          <button onClick={() => void run(async () => {
+            const result = await registrationRequest<Detail>(`/${selected.tournamentId}/deck/visibility`, {
+              visible: !selected.deckIsPublic, snapshotNumber: selected.deck!.number, expectedVersion: selected.visibilityVersion,
+            })
+            if (mounted.current) setSelected(result)
+          })}>{selected.deckIsPublic ? 'Retirar autorización pública de mi presentación' : 'Autorizar publicación de esta presentación'}</button>
+        </section>}
         <button onClick={() => void run(async () => {
           const result = await registrationRequest<PresentedDeck[]>(`/${selected.tournamentId}/deck/history`)
           if (mounted.current) setHistory(result)

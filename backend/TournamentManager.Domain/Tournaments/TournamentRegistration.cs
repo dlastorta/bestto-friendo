@@ -10,6 +10,18 @@ public sealed class TournamentRegistration
     public Guid TournamentId { get; private set; }
     public Guid PlayerId { get; private set; }
     public DateTimeOffset RegisteredAt { get; private set; }
+    public int? PublicSnapshotNumber { get; private set; }
+    public int VisibilityVersion { get; private set; }
+    public DateTimeOffset? VisibilityChangedAt { get; private set; }
+
+    public void SetDeckVisibility(bool visible, int snapshotNumber, int expectedVersion, DateTimeOffset now)
+    {
+        if (VisibilityVersion != expectedVersion || Snapshot is null || Snapshot.Number != snapshotNumber)
+            throw new TournamentConflictException("La presentación o su visibilidad cambiaron. Recargá antes de continuar.");
+        PublicSnapshotNumber = visible ? snapshotNumber : null;
+        VisibilityVersion++;
+        VisibilityChangedAt = now;
+    }
     public IReadOnlyCollection<TournamentDeckSnapshot> Snapshots => _snapshots.AsReadOnly();
     public TournamentDeckSnapshot? Snapshot => _snapshots.OrderByDescending(s => s.Number).FirstOrDefault();
 
@@ -44,6 +56,8 @@ public sealed class TournamentRegistration
             throw new TournamentRuleViolationException("Indicá un motivo de entre 1 y 500 caracteres.");
         tournament.RecordParticipationChange();
         _snapshots.Add(new TournamentDeckSnapshot(Id, deck, Snapshot.Number + 1, PlayerId, normalizedReason, now));
+        PublicSnapshotNumber = null;
+        VisibilityVersion++;
     }
 }
 

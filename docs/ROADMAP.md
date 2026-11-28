@@ -1,6 +1,6 @@
 # Roadmap — Tournament Manager
 
-Estado: Slices 01–12 integrados; Slice 13 implementado y verificado localmente, pendiente de revisión. Actualizado el 2026-11-27.
+Estado: Slices 01–13 integrados; Slice 14 en implementación y verificación. Actualizado el 2026-11-27.
 
 ## Objetivo
 
@@ -119,3 +119,7 @@ Antes de iniciar un Top 8, permitir correcciones de resultados previos y regener
 ## Slice 13 — Alcance confirmado
 
 Cierre manual con todas las rondas completas, reapertura con motivo solo para corregir resultados y volver a cerrar. Antes del primer cierre se permite regenerar explícitamente únicamente la última ronda, preservando versiones y resultados anulados. Nunca regenerar después del cierre, tampoco al reabrir. Finalizar no publica. Ver [contratos y verificación](slices/13-CIERRE.md).
+
+## Slice 14 — Alcance confirmado
+
+Publicación y retiro por organizador propietario de torneos finalizados, lectura anónima por enlace. Presentaciones privadas salvo autorización individual y revocable del jugador. Reabrir retira publicación; cerrar nuevamente no republica automáticamente. Ver [detalle](slices/14-PUBLICACION.md).

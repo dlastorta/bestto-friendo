@@ -20,6 +20,20 @@ public sealed class Tournament
     public int ResultsVersion { get; private set; }
     public int LifecycleVersion { get; private set; }
     public DateTimeOffset? FinishedAt { get; private set; }
+    public DateTimeOffset? PublishedAt { get; private set; }
+    public int PublicationVersion { get; private set; }
+
+    public void SetPublication(bool published, int expectedPublicationVersion, int expectedLifecycleVersion, DateTimeOffset now)
+    {
+        if (PublicationVersion != expectedPublicationVersion || LifecycleVersion != expectedLifecycleVersion)
+            throw new TournamentConflictException("La publicación o el estado cambiaron. Recargá antes de continuar.");
+        if (published && Status != TournamentStatus.Finished)
+            throw new TournamentConflictException("Solo se puede publicar un torneo finalizado.");
+        if (published == PublishedAt.HasValue)
+            throw new TournamentConflictException("La publicación ya tiene ese estado. Recargá el torneo.");
+        PublishedAt = published ? now : null;
+        PublicationVersion++;
+    }
     public IReadOnlyCollection<TournamentLifecycleEvent> Lifecycle => _lifecycle.AsReadOnly();
 
     public void Finish(IReadOnlyCollection<Guid> participants, IReadOnlyCollection<TournamentMatch> matches,
@@ -48,6 +62,7 @@ public sealed class Tournament
         var note = (reason ?? "").Trim();
         if (note.Length is < 1 or > 500) throw new TournamentRuleViolationException("Indicá un motivo de entre 1 y 500 caracteres.");
         Status = TournamentStatus.Correction;
+        if (PublishedAt is not null) { PublishedAt = null; PublicationVersion++; }
         LifecycleVersion++;
         _lifecycle.Add(new(Id, LifecycleVersion, "Reopened", note, actor, now, [], []));
     }

@@ -71,6 +71,7 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         tournament.ToTable("tournaments");
         tournament.HasKey(item => item.Id);
         tournament.Property(item => item.Id).ValueGeneratedNever();
+        tournament.Property(item => item.PublicationVersion).IsConcurrencyToken();
         tournament.Property(item => item.Name).HasMaxLength(120).IsRequired();
         tournament.Property(item => item.Status).HasConversion<string>().HasMaxLength(30).IsRequired().IsConcurrencyToken();
         tournament.HasOne(t => t.StartedRules).WithOne().HasForeignKey<FrozenTournamentRules>(r => r.TournamentId).OnDelete(DeleteBehavior.Restrict);
@@ -106,6 +107,7 @@ public sealed class TournamentDbContext(DbContextOptions<TournamentDbContext> op
         var registration = modelBuilder.Entity<TournamentRegistration>();
         registration.ToTable("tournament_registrations");
         registration.HasKey(r => r.Id);
+        registration.Property(r => r.VisibilityVersion).IsConcurrencyToken();
         registration.Property(r => r.Id).ValueGeneratedNever();
         registration.HasIndex(r => new { r.TournamentId, r.PlayerId }).IsUnique();
         registration.HasOne<Tournament>().WithMany().HasForeignKey(r => r.TournamentId).OnDelete(DeleteBehavior.Restrict);

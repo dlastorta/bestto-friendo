@@ -1,6 +1,6 @@
 # Arquitectura — Tournament Manager
 
-Estado: Slice 12 (rondas suizas versionadas). La separación estricta de proyectos se mantiene desde el bootstrap.
+Estado: Slice 14 (publicación con consentimiento individual). La separación estricta de proyectos se mantiene desde el bootstrap.
 
 ## Decisiones
 
@@ -154,3 +154,9 @@ SwissRound calcula pares y bye en Domain y conserva orden, actor, fecha y versio
 Tournament controla estados Finished y Correction, con LifecycleVersion como token concurrente junto con versiones de asignaciones/resultados y Status. TournamentLifecycleEvent conserva actor, fecha, motivo y referencias a revisiones de resultados y byes por cierre. No persiste acumulados deportivos.
 
 Regenerar conserva SwissRound por número/revisión; las asignaciones anuladas tienen IsSuperseded y quedan fuera de consultas deportivas mediante filtros EF y de la tabla mediante reglas puras. Los índices únicos de bye solo cubren asignaciones vigentes. EfSwissRounds guarda anulación y nuevas asignaciones dentro de una transacción; un conflicto revierte ambas. Los endpoints de historial son privados del organizador. La migración bloquea rollback si borraría historial del Slice 13.
+
+## Slice 14
+
+PublicationVersion serializa publicación/retiro frente a reapertura, que limpia PublishedAt en el mismo commit. VisibilityVersion protege cambios de consentimiento y reemplazos de snapshot; PublicSnapshotNumber identifica exactamente la presentación autorizada. Migración con defaults privados.
+
+IPublishedTournaments es el puerto para lectura pública consistente. Infrastructure usa RepeatableRead para unir estado de publicación, participantes, consentimientos y resultados sin mezclar momentos distintos; solo consulta texto de snapshots autorizados. Application calcula clasificación con Domain y proyecta DTO público específico. API anónima separada de controles administrativos autenticados/CSRF; no-store. React separa ruta pública por hash de la pantalla privada y presenta texto escapado. No se despliega la API a Internet.

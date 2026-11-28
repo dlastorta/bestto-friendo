@@ -64,3 +64,25 @@ it('conserva selección ante conflicto de presentación', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('El mazo cambió')
   expect(screen.getByLabelText('Mazo a presentar')).toHaveValue('deck')
 })
+
+it('permite autorizar y retirar solo la presentación propia usando versiones y CSRF', async () => {
+  let visible = false
+  let version = 0
+  const detail = () => ({ tournamentId: 'cup', status: 'Finished', hasPresentedDeck: true, deckIsPublic: visible, visibilityVersion: version,
+    deck: { name: 'Propio', listText: 'Lista privada', sourceRevision: 1, number: 1 } })
+  const request = vi.fn(async (url: string, options?: RequestInit) => {
+    if (url === '/api/auth/csrf') return response({ token: 'csrf' })
+    if (url === '/api/registrations') return response([{ tournamentId: 'cup', name: 'Copa', gameId: 'game', hasPresentedDeck: true }])
+    if (url.startsWith('/api/decks')) return response([])
+    if (url.endsWith('/visibility')) { visible = JSON.parse(options!.body as string).visible; version++; return response(detail()) }
+    return response(detail())
+  })
+  vi.stubGlobal('fetch', request)
+  render(<Registrations onSessionExpired={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: 'Recargar mis inscripciones' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Copa' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Autorizar publicación de esta presentación' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Retirar autorización pública de mi presentación' }))
+  await screen.findByRole('button', { name: 'Autorizar publicación de esta presentación' })
+  expect(request).toHaveBeenCalledWith('/api/registrations/cup/deck/visibility', expect.objectContaining({ body: JSON.stringify({ visible: false, snapshotNumber: 1, expectedVersion: 1 }), headers: expect.objectContaining({ 'X-CSRF-TOKEN': 'csrf' }) }))
+})

@@ -9,7 +9,7 @@ public sealed record ParticipantStatus(Guid PlayerId, string DisplayName, bool H
 public sealed record MyRegistration(Guid TournamentId, string Name, Guid GameId, bool HasPresentedDeck, string Status = "Draft");
 public sealed record PresentedDeck(Guid SourceDeckId, int SourceRevision, Guid GameId, string Name,
     string ListText, IReadOnlyList<Guid> FactionIds, DateTimeOffset PresentedAt, int Number, Guid ActorPlayerId, string Reason);
-public sealed record RegistrationDetail(Guid TournamentId, bool HasPresentedDeck, PresentedDeck? Deck, string Status = "Draft");
+public sealed record RegistrationDetail(Guid TournamentId, bool HasPresentedDeck, PresentedDeck? Deck, string Status = "Draft", bool DeckIsPublic = false, int VisibilityVersion = 0);
 public sealed record PresentDeck(Guid DeckId, int? ExpectedDeckVersion);
 public sealed record ReplacePresentedDeck(Guid DeckId, int? ExpectedDeckVersion, int? ExpectedPresentationVersion, string? Reason);
 
@@ -129,6 +129,18 @@ public sealed class TournamentRegistrationsHandler(ICurrentAccount current, IPla
 
     private static PresentedDeck SnapshotDto(TournamentDeckSnapshot s) =>
         new(s.SourceDeckId, s.SourceRevision, s.GameId, s.Name, s.ListText, s.FactionIds.ToArray(), s.PresentedAt, s.Number, s.ActorPlayerId, s.Reason);
+    public async Task<RegistrationDetail?> SetVisibilityAsync(Guid id, SetDeckVisibility command, CancellationToken ct)
+    {
+        var player = await PlayerAsync(ct);
+        var tournament = await registrations.FindForPlayerAsync(id, player, ct);
+        var registration = await registrations.FindAsync(id, player, ct);
+        if (tournament is null || registration is null) return null;
+        if (command.Visible is null || command.SnapshotNumber is null || command.ExpectedVersion is null)
+            throw new TournamentRuleViolationException("Indicá visibilidad, presentación y versión esperada.");
+        registration.SetDeckVisibility(command.Visible.Value, command.SnapshotNumber.Value, command.ExpectedVersion.Value, DateTimeOffset.UtcNow);
+        await registrations.SaveAsync(ct);
+        return Detail(registration, tournament);
+    }
     private static RegistrationDetail Detail(TournamentRegistration registration, Tournament tournament) => new(registration.TournamentId,
-        registration.Snapshot is not null, registration.Snapshot is { } s ? SnapshotDto(s) : null, tournament.Status.ToString());
+        registration.Snapshot is not null, registration.Snapshot is { } s ? SnapshotDto(s) : null, tournament.Status.ToString(), registration.PublicSnapshotNumber == registration.Snapshot?.Number && registration.PublicSnapshotNumber is not null, registration.VisibilityVersion);
 }

@@ -1,3 +1,4 @@
+import { TournamentPublication } from './TournamentPublication'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { listGames, type Game } from '../games/api'
 import { AuthenticationError } from '../identity/api'
@@ -95,11 +96,12 @@ export function TournamentDrafts({ onAccessLost }: { onAccessLost: () => void })
         {selected && <article className="tournament-detail" aria-labelledby="tournament-detail-heading">
           <h3 id="tournament-detail-heading">Detalle del torneo</h3>
           <dl><dt>Nombre</dt><dd>{selected.name}</dd><dt>Juego</dt><dd>{games.find(game => game.id === selected.gameId)?.name}</dd>
-            <dt>Estado</dt><dd>{selected.status === 'Draft' ? 'Borrador' : selected.status}</dd><dt>Visibilidad</dt><dd>Privado</dd></dl>
+            <dt>Estado</dt><dd>{selected.status === 'Draft' ? 'Borrador' : selected.status}</dd><dt>Visibilidad</dt><dd>{selected.publishedAt ? 'Publicado' : 'Privado'}</dd></dl>
           <button disabled={busy} onClick={() => void open(selected.id)}>Recargar detalle del torneo</button>
           <TournamentStart key={`start-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
           <TournamentRulesEditor key={`${selected.id}-${selected.rulesVersion}-${selected.status}`} tournament={{ ...selected, rules: selected.startedRules ?? selected.rules }} onSaved={setSelected} onAccessLost={onAccessLost} />
           <TournamentLifecycle key={`lifecycle-${selected.id}-${selected.status}`} tournament={selected} onAccessLost={onAccessLost} onSaved={value => { setSelected(value); setReload(n => n + 1) }} />
+          <TournamentPublication key={`publication-${selected.id}-${selected.status}-${selected.publicationVersion}`} tournament={selected} onSaved={value => { setSelected(value); setReload(n => n + 1) }} onAccessLost={onAccessLost} />
           <TournamentParticipants key={`participants-${selected.id}-${selected.status}`} tournamentId={selected.id} status={selected.status} onAccessLost={onAccessLost} />
           {selected.status !== 'Draft' && <TournamentMatches key={`matches-${selected.id}-${selected.status}`} status={selected.status} tournamentId={selected.id} onAccessLost={onAccessLost} />}
           {selected.status !== 'Draft' && <TournamentByes status={selected.status} key={`byes-${selected.id}`} tournamentId={selected.id} onAccessLost={onAccessLost} />}
